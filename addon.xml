@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.hanssettings" name="Hans Settings Kanalenlijst" provider-name="Bas Magré (Opvolger)" version="1.0.0">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0" />
+    <import addon="script.module.xbmcswift2" version="2.4.0" />
+    <import addon="script.common.plugin.cache" version="2.5.5"/>
+  </requires>
+  <extension library="addon.py" point="xbmc.python.pluginsource">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <license>GNU GENERAL PUBLIC LICENSE. Version 3, June 2007</license>
+    <forum></forum>
+    <website>https://github.com/Opvolger</website>
+    <email>Opvolger at gmail dot com</email>
+    <language>nl</language>
+    <platform>all</platform>
+    <source>https://github.com/Opvolger/plugin.video.hanssettings/</source>
+    <summary lang="en">Hans Settings Kanalenlijst - Watch free stream from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
+    <summary lang="nl">Hans Settings Kanalenlijst - Bekijk gratis stream van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
+    <description lang="en">Hans Settings Kanalenlijst - Watch free stream from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
+    <description lang="nl">Hans Settings Kanalenlijst - Bekijk gratis stream van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
+  </extension>
+</addon>

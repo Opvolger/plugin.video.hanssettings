@@ -42,12 +42,14 @@ class HansSettings:
             response = urllib2.urlopen(req)
             linkdata=response.read()
             response.close()
-            print(linkdata)
+            # print(linkdata)
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)
-            print(streamsandnames)
+            # print(streamsandnames)
             itemlist = list()
+            i = 0
             for streamandname in streamsandnames:
+                i = i + 1
                 streamadres,streamname = streamandname.split(':')
-                item = { 'label': streamname, 'stream': streamadres.replace('%3a',':') }
+                item = { 'label': streamname, 'stream': streamadres.replace('%3a',':'), 'i': i}
                 itemlist.append(item)
             return itemlist

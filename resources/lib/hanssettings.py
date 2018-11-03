@@ -34,7 +34,7 @@ class HansSettings:
                     'filename': streamfile
                 }
                 itemlist.append(hanssettingsitem)                
-            return sorted(itemlist, key=lambda x: x['label'], reverse=False)
+            return itemlist #sorted(itemlist, key=lambda x: x['label'], reverse=False)
 
         def get_items(self, file):
             req = urllib2.Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'+file)

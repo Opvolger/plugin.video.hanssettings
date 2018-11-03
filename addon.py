@@ -23,20 +23,20 @@ try:
 except:
     import storageserverdummy as StorageServer
 
-cache = StorageServer.StorageServer(PLUGIN_ID, 24) # (Your plugin name, Cache time in hours)
+cache = StorageServer.StorageServer(PLUGIN_ID, 10) # (Your plugin name, Cache time in hours)
 
 @plugin.route('/')
 def index():
     ##main, alle shows
     items = [{
-        'path': plugin.url_for('show_afleveringen', file=item['filename']),
+        'path': plugin.url_for('show_streams', file=item['filename']),
         'label': item['label']
     } for item in cache.cacheFunction(hanssettings.get_overzicht)]    
-    return plugin.finish(items,sort_methods=[SortMethod.LABEL])
+    return plugin.finish(items)
 
 @plugin.route('/streams/<file>/')
 def show_streams(file):
-    return show_items(cache.cacheFunction(hanssettings.get_items, file)
+    return show_items(cache.cacheFunction(hanssettings.get_items, file))
 
 @plugin.route('/lectures/<stream>/')
 def play_lecture(stream):

@@ -31,29 +31,29 @@ buffer = 'leeg'
 def index():
     ##main, alle shows
     items = [{
-        'path': plugin.url_for('show_streams', file=item['filename']),
+        'path': plugin.url_for('show_streams', filename=item['filename']),
         'label': item['label']
     } for item in cache.cacheFunction(hanssettings.get_overzicht)]    
     return plugin.finish(items)
 
-@plugin.route('/streams/<file>/')
-def show_streams(file):
-    return show_items(hanssettings.get_items(file), file)
+@plugin.route('/streams/<filename>/')
+def show_streams(filename):
+    return show_items(cache.cacheFunction(hanssettings.get_items,filename), filename)
 
 @plugin.route('/lectures/<fileandstream>')
 def play_lecture(fileandstream):
     filename,stream = fileandstream.split('-:-:-')
-    items = hanssettings.get_items(filename)
+    items = cache.cacheFunction(hanssettings.get_items,filename)
     for item in items:
         if (item['stream'] == stream):
             listitem = xbmcgui.ListItem(item['label'])
             listitem.setInfo('video', {'Title': item['label']})
             xbmc.Player().play(stream, listitem)
 
-def show_items(opgehaaldeitemsclass, file):
+def show_items(opgehaaldeitemsclass, filename):
     items = list()
     for item in opgehaaldeitemsclass:
-        path = __getpath(item, file)
+        path = __getpath(item, filename)
         xbmc.log(path, xbmc.LOGNOTICE)
         items.append({
             'path': path,
@@ -62,9 +62,9 @@ def show_items(opgehaaldeitemsclass, file):
             })
     return plugin.finish(items,sort_methods=[SortMethod.LABEL])
 
-def __getpath(item, file):
+def __getpath(item, filename):
     if (item['stream'].find('?#User-Agent') > -1):
         return item['stream'].partition('?#User-Agent')[0] + '|Referer='+item['stream'].replace('?#User-Agent','&User-Agent')
-    return plugin.url_for('play_lecture', fileandstream=file + '-:-:-' + item['stream'])
+    return plugin.url_for('play_lecture', fileandstream=filename + '-:-:-' + item['stream'])
 if __name__ == '__main__':
     plugin.run()

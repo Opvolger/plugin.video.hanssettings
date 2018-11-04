@@ -1,4 +1,4 @@
-﻿﻿Version 1.0.1
+﻿﻿Version 1.0.2
 * xbmcswift2 is gone.
 
 Version 1.0.1

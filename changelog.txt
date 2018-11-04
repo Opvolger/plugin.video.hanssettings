@@ -1,4 +1,7 @@
 ﻿﻿Version 1.0.1
+* xbmcswift2 is gone.
+
+Version 1.0.1
 * Fixxes 302 Redirects
 
 Version 1.0.0

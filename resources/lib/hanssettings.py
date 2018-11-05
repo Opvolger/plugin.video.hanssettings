@@ -10,7 +10,14 @@
     based on: https://github.com/jbeluch/plugin.video.documentary.net
 
 '''
-import urllib2 ,re ,time ,json
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen, Request    
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen, Request    
+
+import re ,time ,json
 from datetime import datetime
 
 class HansSettings:
@@ -20,10 +27,10 @@ class HansSettings:
         #def __init__( self):
 
         def get_overzicht(self):        
-            req = urllib2.Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
+            req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
-            response = urllib2.urlopen(req)
-            linkdata=response.read()
+            response = urlopen(req)
+            linkdata=response.read().decode('utf-8')
             response.close()
             print(linkdata)
             itemlist = list()
@@ -37,10 +44,10 @@ class HansSettings:
             return itemlist #sorted(itemlist, key=lambda x: x['label'], reverse=False)
 
         def get_items(self, file):
-            req = urllib2.Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'+file)
+            req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'+file)
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
-            response = urllib2.urlopen(req)
-            linkdata=response.read()
+            response = urlopen(req)
+            linkdata=response.read().decode('utf-8')
             response.close()
             # print(linkdata)
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)

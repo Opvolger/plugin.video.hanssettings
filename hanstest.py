@@ -1,9 +1,10 @@
 import resources.lib.hanssettings
 
-hanssettings = resources.lib.hanssettings.HansSettings()
+h = resources.lib.hanssettings.HansSettings()
 
-print hanssettings.get_overzicht()
+print(h)
 
-print '\n\n'
-
-print hanssettings.get_items('userbouquet.stream_nl_nationaal.tv')
+if (h):
+    print(h.get_overzicht())
+    print('\n\n')
+    print(h.get_items('userbouquet.stream_nl_nationaal.tv'))

@@ -7,8 +7,15 @@
     
 '''
 import sys
-from urllib import urlencode
-from urlparse import parse_qsl
+try:
+    # For Python 3.0 and later
+    from urllib.parse import urlencode
+    from urllib.parse import parse_qsl
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib import urlencode
+    from urlparse import parse_qsl
+
 import resources.lib.hanssettings
 import time
 import xbmcplugin, xbmcgui

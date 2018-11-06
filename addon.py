@@ -32,7 +32,7 @@ import xbmcplugin, xbmcgui
 PLUGIN_NAME = 'hanssettings'
 PLUGIN_ID = 'plugin.video.hanssettings'
 
-hanssettings = resources.lib.hanssettings.HansSettings()
+hanssettings = resources.lib.hanssettings.HansSettings(sys.version_info[0] == 3)
 _url = sys.argv[0]
 _handle = int(sys.argv[1])
 

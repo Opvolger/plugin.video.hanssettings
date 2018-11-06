@@ -32,7 +32,7 @@ class HansSettings:
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
-            if (PY3):
+            if (self.PY3):
                 linkdata=response.read().decode('utf-8')
             else:
                 linkdata=response.read()
@@ -53,7 +53,7 @@ class HansSettings:
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
-            if (PY3):
+            if (self.PY3):
                 linkdata=response.read().decode('utf-8')
             else:
                 linkdata=response.read()

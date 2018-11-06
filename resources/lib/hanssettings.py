@@ -26,16 +26,16 @@ class HansSettings:
         # Init
         #
         def __init__(self, py3):
-            PY3 = py3
+            self.PY3 = py3
         def get_overzicht(self):        
             req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
             if (PY3):
-                linkdata=response.read()
-            else:
                 linkdata=response.read().decode('utf-8')
+            else:
+                linkdata=response.read()
             response.close()
             print(linkdata)
             itemlist = list()
@@ -54,9 +54,9 @@ class HansSettings:
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
             if (PY3):
-                linkdata=response.read()
-            else:
                 linkdata=response.read().decode('utf-8')
+            else:
+                linkdata=response.read()
             response.close()
             # print(linkdata)
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)

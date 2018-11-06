@@ -29,8 +29,9 @@ class HansSettings:
         def get_overzicht(self):        
             req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
+            req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
-            linkdata=response.read().decode('utf-8')
+            linkdata=response.read()
             response.close()
             print(linkdata)
             itemlist = list()
@@ -46,8 +47,9 @@ class HansSettings:
         def get_items(self, file):
             req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'+file)
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
+            req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
-            linkdata=response.read().decode('utf-8')
+            linkdata=response.read()
             response.close()
             # print(linkdata)
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)

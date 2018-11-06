@@ -11,10 +11,19 @@ try:
     # For Python 3.0 and later
     from urllib.parse import urlencode
     from urllib.parse import parse_qsl
+    #File "*****\script.common.plugin.cache\default.py", line 30, in run
+    #  sys.path = [settings.getAddonInfo('path').decode('utf-8') + "/lib"] + sys.path
+    #  AttributeError: 'str' object has no attribute 'decode'    
+    import storageserverdummy as StorageServer
+
 except ImportError:
     # Fall back to Python 2's urllib2
     from urllib import urlencode
     from urlparse import parse_qsl
+    try:
+        import StorageServer
+    except:
+        import storageserverdummy as StorageServer
 
 import resources.lib.hanssettings
 import time
@@ -26,11 +35,6 @@ PLUGIN_ID = 'plugin.video.hanssettings'
 hanssettings = resources.lib.hanssettings.HansSettings()
 _url = sys.argv[0]
 _handle = int(sys.argv[1])
-
-try:
-    import StorageServer
-except:
-    import storageserverdummy as StorageServer
 
 cache = StorageServer.StorageServer(PLUGIN_ID, 10) # (Your plugin name, Cache time in hours)
 buffer = 'leeg'

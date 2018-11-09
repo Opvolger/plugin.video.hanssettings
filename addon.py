@@ -37,7 +37,10 @@ _url = sys.argv[0]
 _handle = int(sys.argv[1])
 
 cache = StorageServer.StorageServer(PLUGIN_ID, 10) # (Your plugin name, Cache time in hours)
-buffer = 'leeg'
+
+
+def get_url_github(file):
+    return 
 
 def get_url(**kwargs):
     """
@@ -50,15 +53,12 @@ def get_url(**kwargs):
     return '{0}?{1}'.format(_url, urlencode(kwargs))
 
 def get_categories():
-    streamfiles = list()
-    streams = cache.cacheFunction(hanssettings.get_overzicht)
-    for stream in streams:
-        streamfiles.append(stream['label'])
-    return streamfiles
+    githubfiles = cache.cacheFunction(hanssettings.get_dataoverzicht)
+    return hanssettings.get_overzicht(githubfiles)
 
 def get_videos(streamfile):
-    streams = cache.cacheFunction(hanssettings.get_items,streamfile)
-    return streams
+    streamsdatafile = cache.cacheFunction(hanssettings.get_datafromfilegithub,streamfile)
+    return hanssettings.get_items(streamsdatafile)
 
 def list_categories():
     """
@@ -71,11 +71,10 @@ def list_categories():
     # for this type of content.
     xbmcplugin.setContent(_handle, 'videos')
     # Get video categories
-    categories = get_categories()
-    # Iterate through categories
-    for category in categories:
+    for category in get_categories():
+        datafile = cache.cacheFunction(hanssettings.get_datafromfilegithub,category)
         # Create a list item with a text label and a thumbnail image.
-        list_item = xbmcgui.ListItem(label=category)
+        list_item = xbmcgui.ListItem(label=hanssettings.get_name(datafile, category))
         # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
         # Here we use the same image for all items for simplicity's sake.
         # In a real-life plugin you need to set each image accordingly.
@@ -88,8 +87,8 @@ def list_categories():
         # For available properties see the following link:
         # https://codedocs.xyz/xbmc/xbmc/group__python__xbmcgui__listitem.html#ga0b71166869bda87ad744942888fb5f14
         # 'mediatype' is needed for a skin to display info for this ListItem correctly.
-        list_item.setInfo('video', {'title': category,
-                                    # 'genre': category,
+
+        list_item.setInfo('video', {'title': hanssettings.get_name(datafile, category),
                                     'mediatype': 'video'})
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=listing&category=Animals

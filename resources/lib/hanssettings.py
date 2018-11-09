@@ -27,29 +27,16 @@ class HansSettings:
         #
         def __init__(self, py3):
             self.PY3 = py3
-        def get_overzicht(self):        
-            req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
-            req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
-            req.add_header('Content-Type', 'text/html; charset=utf-8')
-            response = urlopen(req)
-            if (self.PY3):
-                linkdata=response.read().decode('utf-8')
-            else:
-                linkdata=response.read()
-            response.close()
-            print(linkdata)
-            itemlist = list()
-            streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)
-            for streamfile in streamfiles:
-                hanssettingsitem = {
-                    'label': streamfile,
-                    'filename': streamfile
-                }
-                itemlist.append(hanssettingsitem)                
-            return itemlist #sorted(itemlist, key=lambda x: x['label'], reverse=False)
 
-        def get_items(self, file):
-            req = Request('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'+file)
+
+        def get_dataoverzicht(self):
+            return self.get_datafromurl('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
+
+        def get_datafromfilegithub(self, file):
+            return self.get_datafromurl('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/' + file)
+        
+        def get_datafromurl(self, url):
+            req = Request(url)
             req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
@@ -58,7 +45,21 @@ class HansSettings:
             else:
                 linkdata=response.read()
             response.close()
-            # print(linkdata)
+            return linkdata
+
+        def get_overzicht(self, linkdata):
+            itemlist = list()
+            streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)               
+            return streamfiles #sorted(itemlist, key=lambda x: x['label'], reverse=False)
+
+        def get_name(self, linkdata, filename):
+            try:
+                names = re.findall("^#NAME (.*)", linkdata)
+                return names[0]
+            except:
+                return filename
+
+        def get_items(self, linkdata):
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)
             # print(streamsandnames)
             itemlist = list()

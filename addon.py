@@ -38,10 +38,6 @@ _handle = int(sys.argv[1])
 
 cache = StorageServer.StorageServer(PLUGIN_ID, 10) # (Your plugin name, Cache time in hours)
 
-
-def get_url_github(file):
-    return 
-
 def get_url(**kwargs):
     """
     Create a URL for calling the plugin recursively from the given set of keyword arguments.
@@ -102,7 +98,17 @@ def list_categories():
     # Finish creating a virtual folder.
     xbmcplugin.endOfDirectory(_handle)
 
-def list_videos(category):
+def add_playable_listitem(video):
+    list_item = xbmcgui.ListItem(label=video['label'])
+    list_item.setInfo('video', {'title': video['label'],
+                # 'genre': video['genre'],
+                'mediatype': 'video'})
+    list_item.setProperty('IsPlayable', 'true')
+    url = get_url(action='play', video=video['stream'])
+    is_folder = False
+    xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
+
+def list_videos_and_subfolder(category):
     """
     Create the list of playable videos in the Kodi interface.
     :param category: Category name
@@ -110,39 +116,38 @@ def list_videos(category):
     """
     # Set plugin category. It is displayed in some skins as the name
     # of the current section.
-    xbmcplugin.setPluginCategory(_handle, category)
+    datafile = cache.cacheFunction(hanssettings.get_datafromfilegithub,category)
+    xbmcplugin.setPluginCategory(_handle, hanssettings.get_name(datafile, category))
     # Set plugin content. It allows Kodi to select appropriate views
     # for this type of content.
     xbmcplugin.setContent(_handle, 'videos')
-    # Get the list of videos in the category.
-    videos = get_videos(category)
     # Iterate through videos.
-    for video in videos:
-        # Create a list item with a text label and a thumbnail image.
-        list_item = xbmcgui.ListItem(label=video['label'])
-        # Set additional info for the list item.
-        # 'mediatype' is needed for skin to display info for this ListItem correctly.
-        list_item.setInfo('video', {'title': video['label'],
-                                    # 'genre': video['genre'],
-                                    'mediatype': 'video'})
-        # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
-        # Here we use the same image for all items for simplicity's sake.
-        # In a real-life plugin you need to set each image accordingly.
-        # list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb']})
-        # Set 'IsPlayable' property to 'true'.
-        # This is mandatory for playable items!
-        list_item.setProperty('IsPlayable', 'true')
-        # Create a URL for a plugin recursive call.
-        # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/wp-content/uploads/2017/04/crab.mp4
-        url = get_url(action='play', video=video['stream'])
-        # Add the list item to a virtual Kodi folder.
-        # is_folder = False means that this item won't open any sub-list.
-        is_folder = False
-        # Add our item to the Kodi virtual folder listing.
-        xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
+    for item in get_videos(category):
+        if (item['subfolder']):
+            list_item = xbmcgui.ListItem(label=item['label'])
+            list_item.setInfo('video', {'title': item['label'],
+                            # 'genre': video['genre'],
+                            'mediatype': 'video'})
+            url = get_url(action='subfolder', category=category, counter=item['counter'])
+            is_folder = True
+            xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
+        else:
+            for stream in item['streams']:
+                add_playable_listitem(stream)
     # Add a sort method for the virtual folder items (alphabetically, ignore articles)
-    xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+    # xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
     # Finish creating a virtual folder.
+    xbmcplugin.endOfDirectory(_handle)
+
+def list_subfolder(category, counter):
+    xbmc.log('counter: ' + counter, xbmc.LOGNOTICE)
+    xbmc.log('category: ' + category, xbmc.LOGNOTICE)
+    datafile = cache.cacheFunction(hanssettings.get_datafromfilegithub,category)
+    item = hanssettings.get_items_subfolder(datafile, counter)
+    xbmcplugin.setPluginCategory(_handle, item['label'])
+    xbmcplugin.setContent(_handle, 'videos')
+    for stream in item['streams']:
+        add_playable_listitem(stream)
     xbmcplugin.endOfDirectory(_handle)
 
 def play_video(path):
@@ -173,7 +178,10 @@ def router(paramstring):
     if params:
         if params['action'] == 'listing':
             # Display the list of videos in a provided category.
-            list_videos(params['category'])
+            list_videos_and_subfolder(params['category'])
+        elif params['action'] == 'subfolder':
+            # Play a video from a provided URL.
+            list_subfolder(params['category'], params['counter'])
         elif params['action'] == 'play':
             # Play a video from a provided URL.
             play_video(params['video'])

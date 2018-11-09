@@ -28,9 +28,8 @@ class HansSettings:
         def __init__(self, py3):
             self.PY3 = py3
 
-
         def get_dataoverzicht(self):
-            return self.get_datafromurl('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/bouquets.tv')
+            return self.get_datafromfilegithub('bouquets.tv')
 
         def get_datafromfilegithub(self, file):
             return self.get_datafromurl('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/' + file)
@@ -41,16 +40,15 @@ class HansSettings:
             req.add_header('Content-Type', 'text/html; charset=utf-8')
             response = urlopen(req)
             if (self.PY3):
-                linkdata=response.read().decode('utf-8')
+                linkdata=response.read().decode('utf-8', 'backslashreplace')
             else:
                 linkdata=response.read()
             response.close()
             return linkdata
 
         def get_overzicht(self, linkdata):
-            itemlist = list()
             streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)               
-            return streamfiles #sorted(itemlist, key=lambda x: x['label'], reverse=False)
+            return streamfiles
 
         def get_name(self, linkdata, filename):
             try:
@@ -59,8 +57,33 @@ class HansSettings:
             except:
                 return filename
 
+        def get_items_subfolder(self, linkdata, counter):
+            items = self.get_items(linkdata)
+            for item in items:
+                if (item['subfolder'] and item['counter'] == counter):
+                    return item
+            return
+
         def get_items(self, linkdata):
-            streamsandnames = re.findall("([a-z]*%3a.*:.*)", linkdata)
+            blokken = re.compile("#SERVICE 1:64:[a-z0-9]*[:0]*").split(linkdata)
+            itemlist = list()
+            i = 0
+            for blok in blokken:
+                if blok.find("#DESCRIPTION ++") == -1:
+                    # we hebben geen subfolder alleen maar NAME of NAME met streams
+                    itemlist.append({'subfolder': False, 'streams': self.get_streams(blok)})
+                else:
+                    # we hebben een sub folder met streams
+                    i = i + 1
+                    itemlist.append({'subfolder': True, 'streams': self.get_streams(blok), 'label': self.get_desciptionfolder(blok), 'counter': str(i)})
+            return itemlist
+
+        def get_desciptionfolder(self, data):
+            matches = re.findall("#DESCRIPTION ([+][+].*[+][+])", data)
+            return matches[0]
+
+        def get_streams(self, data):
+            streamsandnames = re.findall("([a-z]*%3a.*:.*)", data)
             # print(streamsandnames)
             itemlist = list()
             i = 0

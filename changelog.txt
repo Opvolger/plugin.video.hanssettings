@@ -1,4 +1,7 @@
-﻿﻿Version 1.0.3
+﻿﻿Version 1.0.4
+* Processbar
+
+Version 1.0.3
 * Description from files.
 
 Version 1.0.2

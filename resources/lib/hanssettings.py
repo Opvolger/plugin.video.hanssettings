@@ -21,6 +21,8 @@ import re ,time ,json
 from datetime import datetime
 PY3 = False
 
+# hierin geen logica van kodi, zodat dit los testbaar is.
+
 class HansSettings:
         #
         # Init
@@ -84,12 +86,9 @@ class HansSettings:
 
         def get_streams(self, data):
             streamsandnames = re.findall("([a-z]*%3a.*:.*)", data)
-            # print(streamsandnames)
             itemlist = list()
-            i = 0
             for streamandname in streamsandnames:
-                i = i + 1
                 streamadres,streamname = streamandname.split(':')
-                item = { 'label': streamname, 'stream': streamadres.replace('%3a',':'), 'i': i}
+                item = { 'label': streamname, 'stream': streamadres.replace('%3a',':')}
                 itemlist.append(item)
             return itemlist

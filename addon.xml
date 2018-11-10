@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.hanssettings" name="Hans Settings Kanalenlijst" provider-name="Bas Magré (Opvolger)" version="1.0.3">
+<addon id="plugin.video.hanssettings" name="Kanalenlijst Hans (Streams)" provider-name="Bas Magré (Opvolger)" version="1.0.4">
   <requires>
     <import addon="xbmc.python" version="2.25.0" />
     <import addon="script.common.plugin.cache" version="2.5.10"/>
@@ -15,9 +15,9 @@
     <language>nl</language>
     <platform>all</platform>
     <source>https://github.com/Opvolger/plugin.video.hanssettings/</source>
-    <summary lang="en">Hans Settings Kanalenlijst - Watch free stream from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
-    <summary lang="nl">Hans Settings Kanalenlijst - Bekijk gratis stream van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
-    <description lang="en">Hans Settings Kanalenlijst - Watch free stream from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
-    <description lang="nl">Hans Settings Kanalenlijst - Bekijk gratis stream van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
+    <summary lang="en">Kanalenlijst Hans - View free streams from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
+    <summary lang="nl">Kanalenlijst Hans - Bekijk gratis streams van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
+    <description lang="en">Kanalenlijst Hans (but then only the streams) - View free streams from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
+    <description lang="nl">Kanalenlijst Hans (maar dan alleen de streams) - Bekijk gratis streams van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
   </extension>
 </addon>

@@ -17,3 +17,7 @@ msgstr "Download stream files from github..."
 msgctxt "#32002"
 msgid "Progress"
 msgstr "Progress"
+
+msgctxt "#32003"
+msgid "Files %d/%d done"
+msgstr "Files %d/%d done"

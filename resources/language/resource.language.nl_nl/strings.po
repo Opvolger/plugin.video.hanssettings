@@ -17,3 +17,7 @@ msgstr "Download stream bestanden van github..."
 msgctxt "#32002"
 msgid "Vooruitgang"
 msgstr "Vooruitgang"
+
+msgctxt "#32003"
+msgid "Bestanden %d/%d gedaan"
+msgstr "Bestanden %d/%d gedaan"

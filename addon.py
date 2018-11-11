@@ -69,7 +69,7 @@ def list_categories():
     progress.create(_addon.getLocalizedString(32002), _addon.getLocalizedString(32001))
     for category in categories:
         i = i + 1
-        progressText = _addon.getLocalizedString(32002) + ' ' + str(i) + '/' + str(categoriesLength)
+        progressText = _addon.getLocalizedString(32003) % (i, categoriesLength)
         progress.update( 100 / categoriesLength * i, "", progressText)
         if progress.iscanceled():
             break

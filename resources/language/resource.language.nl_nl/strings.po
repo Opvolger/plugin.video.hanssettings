@@ -11,13 +11,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#32001"
-msgid "Download stream bestanden van github..."
+msgid "Download stream files from github..."
 msgstr "Download stream bestanden van github..."
 
 msgctxt "#32002"
-msgid "Vooruitgang"
+msgid "Progress"
 msgstr "Vooruitgang"
 
 msgctxt "#32003"
-msgid "Bestanden %d/%d gedaan"
+msgid "Files %d/%d done"
 msgstr "Bestanden %d/%d gedaan"

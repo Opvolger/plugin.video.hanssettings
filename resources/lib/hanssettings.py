@@ -10,13 +10,8 @@
     based on: https://github.com/jbeluch/plugin.video.documentary.net
 
 '''
-try:
-    # For Python 3.0 and later
-    from urllib.request import urlopen, Request    
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import urlopen, Request    
-
+import sys
+import os
 import re ,time ,json
 from datetime import datetime
 PY3 = False
@@ -27,30 +22,32 @@ class HansSettings:
         #
         # Init
         #
-        def __init__(self, py3):
-            self.PY3 = py3
+        def __init__(self):
+            self.PY3 = sys.version_info[0] == 3
 
         def get_dataoverzicht(self):
             return self.get_datafromfilegithub('bouquets.tv')
 
-        def get_datafromfilegithub(self, file):
-            return self.get_datafromurl('https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/' + file)
+        def get_datafromfilegithub(self, file):            
+            return self.get_datafromdisk(file)
         
-        def get_datafromurl(self, url):
-            req = Request(url)
-            req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
-            req.add_header('Content-Type', 'text/html; charset=utf-8')
-            response = urlopen(req)
+        def get_datafromdisk(self, file):
+            dirgithubfile = os.path.dirname(os.path.dirname(__file__))
+            dirgithubfile = os.path.join(dirgithubfile, 'githubfiles', file)
             if (self.PY3):
-                linkdata=response.read().decode('utf-8', 'backslashreplace')
+                openfile=open(dirgithubfile,'r', errors='ignore')
             else:
-                linkdata=response.read()
-            response.close()
+                openfile=open(dirgithubfile,'r')
+            linkdata = openfile.read()
             return linkdata
 
         def get_overzicht(self, linkdata):
             streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)               
             return streamfiles
+
+        def get_version(self, linkdata):
+            versions = re.findall("userbouquet[.]gemaakt_(.*).tv", linkdata)               
+            return versions[0]
 
         def get_name(self, linkdata, filename):
             try:

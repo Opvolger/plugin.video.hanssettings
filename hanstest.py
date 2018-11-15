@@ -1,6 +1,6 @@
 import resources.lib.hanssettings
 
-h = resources.lib.hanssettings.HansSettings(True)
+h = resources.lib.hanssettings.HansSettings()
 
 print(h)
 

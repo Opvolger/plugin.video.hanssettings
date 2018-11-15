@@ -1,4 +1,7 @@
-﻿﻿Version 1.0.4
+﻿﻿Version 1.0.5
+* Review changes after pull-request
+
+Version 1.0.4
 * Processbar
 
 Version 1.0.3

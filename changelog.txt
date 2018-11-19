@@ -1,4 +1,7 @@
-﻿﻿Version 1.0.5
+﻿﻿Version 1.0.6
+* pull request disapproved, the download of github files restored.
+
+Version 1.0.5
 * Review changes after pull-request
 
 Version 1.0.4

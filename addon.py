@@ -11,10 +11,18 @@ if (sys.version_info[0] == 3):
     # For Python 3.0 and later
     from urllib.parse import urlencode
     from urllib.parse import parse_qsl
+    #File "*****\script.common.plugin.cache\default.py", line 30, in run
+    #  sys.path = [settings.getAddonInfo('path').decode('utf-8') + "/lib"] + sys.path
+    #  AttributeError: 'str' object has no attribute 'decode'    
+    import storageserverdummy as StorageServer    
 else:
     # Fall back to Python 2's urllib2
     from urllib import urlencode
     from urlparse import parse_qsl
+    try:
+        import StorageServer
+    except:
+        import storageserverdummy as StorageServer    
 
 import resources.lib.hanssettings
 import time
@@ -26,6 +34,7 @@ PLUGIN_ID = 'plugin.video.hanssettings'
 _hanssettings = resources.lib.hanssettings.HansSettings()
 _url = sys.argv[0]
 _handle = int(sys.argv[1])
+_cache = StorageServer.StorageServer(PLUGIN_ID, 24) # (Your plugin name, Cache time in hours)
 _addon = xbmcaddon.Addon()
 
 # In deze file heb ik alle logica van kodi zitten.
@@ -42,11 +51,11 @@ def get_url(**kwargs):
     return '{0}?{1}'.format(_url, urlencode(kwargs))
 
 def get_categories():
-    githubfiles = _hanssettings.get_dataoverzicht()
+    githubfiles = _cache.cacheFunction(_hanssettings.get_dataoverzicht)
     return _hanssettings.get_overzicht(githubfiles)
 
 def get_videos(streamfile):
-    streamsdatafile = _hanssettings.get_datafromfilegithub(streamfile)
+    streamsdatafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,streamfile)
     return _hanssettings.get_items(streamsdatafile)
 
 def list_categories():
@@ -63,7 +72,7 @@ def list_categories():
         progress.update( 100 / categoriesLength * i, "", progressText)
         if progress.iscanceled():
             break
-        datafile = _hanssettings.get_datafromfilegithub(category)
+        datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
         list_item = xbmcgui.ListItem(label=_hanssettings.get_name(datafile, category))
         list_item.setInfo('video', {'title': _hanssettings.get_name(datafile, category),
                                     'mediatype': 'video'})
@@ -84,7 +93,7 @@ def add_playable_listitem(video):
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
 def list_videos_and_subfolder(category):
-    datafile = _hanssettings.get_datafromfilegithub(category)
+    datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     xbmcplugin.setPluginCategory(_handle, _hanssettings.get_name(datafile, category))
     xbmcplugin.setContent(_handle, 'videos')
     for item in get_videos(category):
@@ -101,7 +110,7 @@ def list_videos_and_subfolder(category):
     xbmcplugin.endOfDirectory(_handle)
 
 def list_subfolder(category, counter):
-    datafile = _hanssettings.get_datafromfilegithub(category)
+    datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     item = _hanssettings.get_items_subfolder(datafile, counter)
     xbmcplugin.setPluginCategory(_handle, item['label'])
     xbmcplugin.setContent(_handle, 'videos')

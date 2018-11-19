@@ -14,6 +14,13 @@ import sys
 import os
 import re ,time ,json
 from datetime import datetime
+if (sys.version_info[0] == 3):
+    # For Python 3.0 and later
+    from urllib.request import urlopen, Request
+else:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen, Request
+
 PY3 = False
 
 # hierin geen logica van kodi, zodat dit los testbaar is.
@@ -25,21 +32,20 @@ class HansSettings:
         def __init__(self):
             self.PY3 = sys.version_info[0] == 3
 
+        def get_datafromfilegithub(self, file):    
+            url = 'https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'
+            req = Request(url + file)
+            req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
+            req.add_header('Content-Type', 'text/html; charset=utf-8')
+            response = urlopen(req)
+            linkdata=response.read()
+            if (self.PY3):
+                linkdata=linkdata.decode('utf-8', 'backslashreplace')
+            response.close()
+            return linkdata
+
         def get_dataoverzicht(self):
             return self.get_datafromfilegithub('bouquets.tv')
-
-        def get_datafromfilegithub(self, file):            
-            return self.get_datafromdisk(file)
-        
-        def get_datafromdisk(self, file):
-            dirgithubfile = os.path.dirname(os.path.dirname(__file__))
-            dirgithubfile = os.path.join(dirgithubfile, 'githubfiles', file)
-            if (self.PY3):
-                openfile=open(dirgithubfile,'r', errors='ignore')
-            else:
-                openfile=open(dirgithubfile,'r')
-            linkdata = openfile.read()
-            return linkdata
 
         def get_overzicht(self, linkdata):
             streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)               

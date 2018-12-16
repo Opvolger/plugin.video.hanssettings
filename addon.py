@@ -85,8 +85,7 @@ def list_categories():
 
 def add_playable_listitem(video):
     list_item = xbmcgui.ListItem(label=video['label'])
-    list_item.setInfo('video', {'title': video['label'],
-                'mediatype': 'video'})
+    list_item.setInfo('video', {'title': video['label'], 'mediatype': 'video'})
     list_item.setProperty('IsPlayable', 'true')
     url = get_url(action='play', video=video['stream'])
     is_folder = False
@@ -99,8 +98,7 @@ def list_videos_and_subfolder(category):
     for item in get_videos(category):
         if (item['subfolder']):
             list_item = xbmcgui.ListItem(label=item['label'])
-            list_item.setInfo('video', {'title': item['label'],
-                            'mediatype': 'video'})
+            list_item.setInfo('video', {'title': item['label'], 'mediatype': 'video'})
             url = get_url(action='subfolder', category=category, counter=item['counter'])
             is_folder = True
             xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)

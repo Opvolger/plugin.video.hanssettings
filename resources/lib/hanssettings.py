@@ -44,15 +44,15 @@ class HansSettings:
             response.close()
             return linkdata
 
-        def get_dataoverzicht(self):
-            return self.get_datafromfilegithub('bouquets.tv')
+        def get_dataoverzicht(self, soort):
+            return self.get_datafromfilegithub('bouquets.' + soort)
 
-        def get_overzicht(self, linkdata):
-            streamfiles = re.findall("(userbouquet.stream_.*.tv)", linkdata)               
+        def get_overzicht(self, linkdata, soort):
+            streamfiles = re.findall("(userbouquet.stream_.*." + soort + ")", linkdata)               
             return streamfiles
 
-        def get_version(self, linkdata):
-            versions = re.findall("userbouquet[.]gemaakt_(.*).tv", linkdata)               
+        def get_version(self, linkdata, soort):
+            versions = re.findall("userbouquet[.]gemaakt_(.*)." + soort, linkdata)               
             return versions[0]
 
         def get_name(self, linkdata, filename):

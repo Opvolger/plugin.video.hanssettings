@@ -50,19 +50,20 @@ def get_url(**kwargs):
     """
     return '{0}?{1}'.format(_url, urlencode(kwargs))
 
-def get_categories():
-    githubfiles = _cache.cacheFunction(_hanssettings.get_dataoverzicht)
-    return _hanssettings.get_overzicht(githubfiles)
+def get_categories(content_type):
+    soort = get_soort(content_type)
+    githubfiles = _cache.cacheFunction(_hanssettings.get_dataoverzicht, soort)
+    return _hanssettings.get_overzicht(githubfiles, soort)
 
-def get_videos(streamfile):
+def get_items(streamfile):
     streamsdatafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,streamfile)
     return _hanssettings.get_items(streamsdatafile)
 
-def list_categories():
+def list_categories(content_type):
     xbmcplugin.setPluginCategory(_handle, _addon.getLocalizedString(32004))
-    xbmcplugin.setContent(_handle, 'videos')
+    xbmcplugin.setContent(_handle, get_context(content_type))
     i = 0
-    categories = get_categories()
+    categories = get_categories(content_type)
     categoriesLength = len(categories)
     progress = xbmcgui.DialogProgress()
     progress.create(_addon.getLocalizedString(32002), _addon.getLocalizedString(32001))
@@ -74,54 +75,63 @@ def list_categories():
             break
         datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
         list_item = xbmcgui.ListItem(label=_hanssettings.get_name(datafile, category))
-        list_item.setInfo('video', {'title': _hanssettings.get_name(datafile, category),
-                                    'mediatype': 'video'})
-        url = get_url(action='listing', category=category)
+        list_item.setInfo(get_context(content_type), {'title': _hanssettings.get_name(datafile, category),
+                                    'mediatype': get_context(content_type)})
+        url = get_url(action='listing', category=category, content_type=content_type)
         is_folder = True
         xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
     progress.close()
     del progress
     xbmcplugin.endOfDirectory(_handle)
 
-def add_playable_listitem(video):
-    list_item = xbmcgui.ListItem(label=video['label'])
-    list_item.setInfo('video', {'title': video['label'], 'mediatype': 'video'})
+def add_playable_listitem(item, content_type):
+    list_item = xbmcgui.ListItem(label=item['label'])
+    list_item.setInfo(get_context(content_type), {'title': item['label'], 'mediatype': get_context(content_type)})
     list_item.setProperty('IsPlayable', 'true')
-    url = get_url(action='play', video=video['stream'])
+    url = get_url(action='play', item=item['stream'], content_type=content_type)
     is_folder = False
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
-def list_videos_and_subfolder(category):
+def list_items_and_subfolder(category, content_type):
     datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     xbmcplugin.setPluginCategory(_handle, _hanssettings.get_name(datafile, category))
-    xbmcplugin.setContent(_handle, 'videos')
-    for item in get_videos(category):
+    xbmcplugin.setContent(_handle, get_context(content_type))
+    for item in get_items(category):
         if (item['subfolder']):
             list_item = xbmcgui.ListItem(label=item['label'])
-            list_item.setInfo('video', {'title': item['label'], 'mediatype': 'video'})
-            url = get_url(action='subfolder', category=category, counter=item['counter'])
+            list_item.setInfo(get_context(content_type), {'title': item['label'], 'mediatype': get_context(content_type)})
+            url = get_url(action='subfolder', category=category, counter=item['counter'], content_type=content_type)
             is_folder = True
             xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
         else:
             for stream in item['streams']:
-                add_playable_listitem(stream)
+                add_playable_listitem(stream, content_type)
     xbmcplugin.endOfDirectory(_handle)
 
-def list_subfolder(category, counter):
+def list_subfolder(category, counter, content_type):
     datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     item = _hanssettings.get_items_subfolder(datafile, counter)
     xbmcplugin.setPluginCategory(_handle, item['label'])
-    xbmcplugin.setContent(_handle, 'videos')
+    xbmcplugin.setContent(_handle, get_context(content_type))
     for stream in item['streams']:
-        add_playable_listitem(stream)
+        add_playable_listitem(stream, content_type)
     xbmcplugin.endOfDirectory(_handle)
 
-def play_video(path):
+def play_item(path):
     if (path.find('?#User-Agent') > -1):
         path = path.partition('?#User-Agent')[0] + '|User-Agent'+path.partition('?#User-Agent')[2]
-    xbmc.log('path: ' + path, xbmc.LOGDEBUG)
     play_item = xbmcgui.ListItem(path=path)
     xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
+
+def get_context(content_type):
+    if content_type == 'audio':
+        return 'music'
+    return 'video'
+
+def get_soort(content_type):
+    if content_type == 'audio':
+        return 'radio'
+    return 'tv'
 
 def router(paramstring):
     """
@@ -134,18 +144,20 @@ def router(paramstring):
     # {<parameter>: <value>} elements
     params = dict(parse_qsl(paramstring))
     # Check the parameters passed to the plugin
-    if params:
+    content_type = params['content_type']
+    xbmc.log('content_type: ' + content_type, xbmc.LOGNOTICE)
+    if 'action' in params:
         if params['action'] == 'listing':
-            list_videos_and_subfolder(params['category'])
+            list_items_and_subfolder(params['category'], content_type)
         elif params['action'] == 'subfolder':
-            list_subfolder(params['category'], params['counter'])
+            list_subfolder(params['category'], params['counter'], content_type)
         elif params['action'] == 'play':
-            play_video(params['video'])
+            play_item(params['item'])
         else:
             raise ValueError('Invalid paramstring: {0}!'.format(paramstring))
     else:
         # If the plugin is called from Kodi UI without any parameters
-        list_categories()
+        list_categories(content_type)
 
 
 if __name__ == '__main__':

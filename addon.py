@@ -61,7 +61,7 @@ def get_items(streamfile):
 
 def list_categories(content_type):
     xbmcplugin.setPluginCategory(_handle, _addon.getLocalizedString(32004))
-    xbmcplugin.setContent(_handle, get_context(content_type))
+    xbmcplugin.setContent(_handle, 'files')
     i = 0
     categories = get_categories(content_type)
     categoriesLength = len(categories)
@@ -95,7 +95,7 @@ def add_playable_listitem(item, content_type):
 def list_items_and_subfolder(category, content_type):
     datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     xbmcplugin.setPluginCategory(_handle, _hanssettings.get_name(datafile, category))
-    xbmcplugin.setContent(_handle, get_context(content_type))
+    xbmcplugin.setContent(_handle, 'files')
     for item in get_items(category):
         if (item['subfolder']):
             list_item = xbmcgui.ListItem(label=item['label'])
@@ -112,7 +112,7 @@ def list_subfolder(category, counter, content_type):
     datafile = _cache.cacheFunction(_hanssettings.get_datafromfilegithub,category)
     item = _hanssettings.get_items_subfolder(datafile, counter)
     xbmcplugin.setPluginCategory(_handle, item['label'])
-    xbmcplugin.setContent(_handle, get_context(content_type))
+    xbmcplugin.setContent(_handle, 'files')
     for stream in item['streams']:
         add_playable_listitem(stream, content_type)
     xbmcplugin.endOfDirectory(_handle)

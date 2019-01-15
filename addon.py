@@ -77,7 +77,7 @@ def list_categories(content_type):
     for category in categories:
         i = i + 1
         progressText = _addon.getLocalizedString(32003) % (i, categoriesLength)
-        progress.update(100 / categoriesLength * i, "", progressText)
+        progress.update(int(100 / categoriesLength * i), "", progressText)
         if progress.iscanceled():
             break
         datafile = _cache.cacheFunction(

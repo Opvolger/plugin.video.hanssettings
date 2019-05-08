@@ -1,4 +1,7 @@
-﻿﻿Version 2.2.0
+﻿﻿Version 2.2.2
+* add comment and fix processbar, refactor code and renames in code
+
+Version 2.2.0
 * Default content = video.
 
 Version 2.1.0

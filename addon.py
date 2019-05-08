@@ -78,7 +78,8 @@ def list_categories(content_type):
         i = i + 1
         progressText = _addon.getLocalizedString(32003) % (i, categoriesLength)
         # python2 int delen door int = altijd een int, dus eerst omzetten naar een float
-        progress.update(int(100 / float(categoriesLength) * i), "", progressText)
+        progress.update(int(100 / float(categoriesLength) * i),
+                        "", progressText)
         if progress.iscanceled():
             break
         datafile = _cache.cacheFunction(

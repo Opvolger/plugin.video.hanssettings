@@ -4,7 +4,7 @@ from resources.lib.hanssettings import HansSettings
 from streamcheck.lib.streamobject import StreamObject
 
 _hanssettings = HansSettings()
-_num_worker_threads = 5
+_num_worker_threads = 500
 _timeout = 1
 
 print(_hanssettings)
@@ -15,19 +15,43 @@ def worker():
         stream = _q.get()
         if stream is None:
             break
-        print(stream.stream_url)
         try:
-            r = requests.head(stream.stream_url, timeout=_timeout)
+            if (stream.stream_header):
+                _key, _value = stream.stream_header.split('=')
+                headers = {_key : _value}
+                r = requests.head(stream.stream_url, timeout=_timeout, headers=headers)
+            else:
+                r = requests.head(stream.stream_url, timeout=_timeout)
             stream.httpstatuscode = r.status_code
             # print(r.status_code)
+            if (r.status_code != 200):
+                headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'}
+                r = requests.head(stream.stream_url, timeout=_timeout, headers=headers)
+                # print(r.status_code)
+                if (r.status_code != stream.httpstatuscode):
+                    print('new:' + str(r.status_code))
             if (r.status_code == 302):
                 # redirect, we schrijven de nieuwe url al vast weg
                 stream.new_stream_url = r.url
                 # print('new url: ' + r.url)
         except requests.ConnectionError:
+            print('---')
+            print(stream.bouquet_name)
+            print(stream.stream_label)
+            print(stream.stream_url)
+            # print(stream.stream_header)
+            # print(stream.httpstatuscode)
             print("failed to connect")
+            # print('---')
         except:
+            print('---')
+            print(stream.bouquet_name)
+            print(stream.stream_label)
+            print(stream.stream_url)
+            # print(stream.stream_header)
+            # print(stream.httpstatuscode)
             print("Error!")
+            # print('---')
         # we zijn klaar met deze queue opdracht
         _q.task_done()
 
@@ -40,11 +64,8 @@ def loop():
         t.start()
         threads.append(t)
 
-    j = 0
     # we hebben nu alle streams en gaan ze op een queue zetten
     for stream in [st for st in all_streams if st.httpstatuscode == None]:
-        j = j + 1
-        print(str(j))
         _q.put(stream)
 
     # block until all tasks are done
@@ -79,10 +100,10 @@ for filename in github_stream_filenames:
     print(str(i) + ': ' + name)
     streams_datafile = _hanssettings.get_streams(datafile)
     for stream in streams_datafile:
-        all_streams.append(StreamObject(filename, name, stream['label'],stream['stream']))
+        all_streams.append(StreamObject(filename, name, stream['label'], stream['url'], stream['header']))
     # voor testen even met 4 files
-    #if (i == 4):
-    #    break
+    if (i == 10):
+        break
 
 sum_run0 = sum(st.httpstatuscode == None for st in all_streams)
 
@@ -102,17 +123,25 @@ sum_run3 = sum(st.httpstatuscode == None for st in all_streams)
 
 print('done queues')
 for stream in all_streams:
-    print(stream.stream_url)
-    print(stream.httpstatuscode)
-
+    # laat alle vreemde eenden zien, welke nu nog niet wilde
+    if (stream.httpstatuscode != 200):
+        print('---')
+        print(stream.bouquet_name)
+        print(stream.stream_label)
+        print(stream.stream_url)
+        print(stream.stream_header)
+        print(stream.httpstatuscode)
+        print('---')
+print('---')
 print('Run0')
 print(sum_run0)
-
+print('---')
 print('Run1')
 print(sum_run1)
-
+print('---')
 print('Run2')
 print(sum_run2)
-
+print('---')
 print('Run3')
 print(sum_run3)
+print('---')

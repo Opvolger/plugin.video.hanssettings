@@ -121,7 +121,18 @@ class HansSettings:
         for streamandname in streamsandnames:
             # we splitten de regular expression data op : (naam en url)
             streamadres, streamname = streamandname.split(':')
+            url = streamadres.replace('%3a', ':')
+            
+            streamheader = None
+            if "#" in streamadres:
+                streamadres, streamheader = streamadres.split('#')
+                url = streamadres.replace('%3a', ':')
+                stream_play = url + '|' + streamheader
+            else:
+                stream_play = url + '|User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
             item = {'label': streamname,
-                    'stream': streamadres.replace('%3a', ':')}
+                    'header': streamheader,
+                    'stream': stream_play,
+                    'url': url}
             itemlist.append(item)
         return itemlist

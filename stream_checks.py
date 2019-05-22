@@ -4,6 +4,7 @@ from resources.lib.hanssettings import HansSettings
 from streamcheck.lib.streamobject import StreamObject
 from streamcheck.lib.checks.ffprobecheck import FFProbeCheck
 from streamcheck.lib.checks.statuscodecheck import StatusCodeCheck
+from streamcheck.lib.checks.m3u8redirector302 import M3u8RedirectOr302
 
 _hanssettings = HansSettings()
 # hier kan je proberen hoeveel threads / workers je tegelijk aan hebt.
@@ -34,6 +35,24 @@ def worker():
             print("Timeout - FFProbeCheck - " + stream.stream_label)
         except:
             print("Error - FFProbeCheck - " + stream.stream_label)
+        # redirect goed zetten
+        try:
+            #print('in: ' + stream.stream_url + ' ('+str(stream.id)+') ')
+            M3u8RedirectOr302(stream, _timeout).run()
+            #print('out: ' + stream.stream_url + ' ('+str(stream.id)+') ' + stream.status)
+        except requests.ConnectionError:            
+            print("Failed to connect - M3u8RedirectOr302 - " + stream.stream_label)            
+        except:
+            print("Error - M3u8RedirectOr302 - " + stream.stream_label)
+        # kijken of de new url stream wat oplevert met FFProbe
+        try:
+            #print('in: ' + stream.stream_url + ' ('+str(stream.id)+') ')
+            FFProbeCheck(stream, _timeout).run_new()
+            #print('out: ' + stream.stream_url + ' ('+str(stream.id)+') ' + stream.status)
+        except subprocess.TimeoutExpired:
+            print("Timeout - FFProbeCheck - " + stream.stream_label)
+        except:
+            print("Error - FFProbeCheck - " + stream.stream_label)            
         # we zijn klaar met deze queue opdracht
         _q.task_done()
 

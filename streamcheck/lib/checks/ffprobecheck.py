@@ -7,8 +7,17 @@ class FFProbeCheck():
         #print(self.stream.stream_url)
 
     def run(self):
-        metadata=FFProbe(self.stream.stream_url, self.timeout)
-        for probe_stream in metadata.streams:
-            if probe_stream.is_video():
-                #print('Stream contains {} frames.'.format(probe_stream.frames()))
-                self.stream.status = 'OK'
+        if (self.stream.status != 'OK'):
+            metadata=FFProbe(self.stream.stream_url, self.timeout)
+            for probe_stream in metadata.streams:
+                if probe_stream.is_video():
+                    #print('Stream contains {} frames.'.format(probe_stream.frames()))
+                    self.stream.status = 'OK'
+    
+    def run_new(self):
+        if (self.stream.new_stream_url and self.stream.status != 'OK'):
+            metadata=FFProbe(self.stream.new_stream_url, self.timeout)
+            for probe_stream in metadata.streams:
+                if probe_stream.is_video():
+                    #print('Stream contains {} frames.'.format(probe_stream.frames()))
+                    self.stream.status = 'OK'                

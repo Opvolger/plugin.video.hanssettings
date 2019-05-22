@@ -1,5 +1,6 @@
 class StreamObject(object):
-    def __init__(self, bouquet_filename, bouquet_name, stream_label, stream_url, stream_header):
+    def __init__(self, id, bouquet_filename, bouquet_name, stream_label, stream_url, stream_header):
+        self.id = id
         self.bouquet_filename = bouquet_filename
         self.bouquet_name = bouquet_name
         # split stream

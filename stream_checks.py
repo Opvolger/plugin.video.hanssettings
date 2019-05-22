@@ -1,11 +1,14 @@
-import requests, queue, threading
+import requests, queue, threading, sys, subprocess
 
 from resources.lib.hanssettings import HansSettings
 from streamcheck.lib.streamobject import StreamObject
+from streamcheck.lib.checks.ffprobecheck import FFProbeCheck
+from streamcheck.lib.checks.statuscodecheck import StatusCodeCheck
 
 _hanssettings = HansSettings()
-_num_worker_threads = 500
-_timeout = 1
+# hier kan je proberen hoeveel threads / workers je tegelijk aan hebt.
+_num_worker_threads = 50
+_timeout = 5
 
 print(_hanssettings)
 
@@ -15,43 +18,22 @@ def worker():
         stream = _q.get()
         if stream is None:
             break
+        # We proberen een http status-code te bepalen
         try:
-            if (stream.stream_header):
-                _key, _value = stream.stream_header.split('=')
-                headers = {_key : _value}
-                r = requests.head(stream.stream_url, timeout=_timeout, headers=headers)
-            else:
-                r = requests.head(stream.stream_url, timeout=_timeout)
-            stream.httpstatuscode = r.status_code
-            # print(r.status_code)
-            if (r.status_code != 200):
-                headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'}
-                r = requests.head(stream.stream_url, timeout=_timeout, headers=headers)
-                # print(r.status_code)
-                if (r.status_code != stream.httpstatuscode):
-                    print('new:' + str(r.status_code))
-            if (r.status_code == 302):
-                # redirect, we schrijven de nieuwe url al vast weg
-                stream.new_stream_url = r.url
-                # print('new url: ' + r.url)
-        except requests.ConnectionError:
-            print('---')
-            print(stream.bouquet_name)
-            print(stream.stream_label)
-            print(stream.stream_url)
-            # print(stream.stream_header)
-            # print(stream.httpstatuscode)
-            print("failed to connect")
-            # print('---')
+            StatusCodeCheck(stream, _timeout).run()
+        except requests.ConnectionError:            
+            print("Failed to connect - StatusCodeCheck - " + stream.stream_label)
         except:
-            print('---')
-            print(stream.bouquet_name)
-            print(stream.stream_label)
-            print(stream.stream_url)
-            # print(stream.stream_header)
-            # print(stream.httpstatuscode)
-            print("Error!")
-            # print('---')
+            print("Error - StatusCodeCheck - " + stream.stream_label)            
+        # kijken of de stream wat oplevert met FFProbe
+        try:
+            #print('in: ' + stream.stream_url + ' ('+str(stream.id)+') ')
+            FFProbeCheck(stream, _timeout).run()
+            #print('out: ' + stream.stream_url + ' ('+str(stream.id)+') ' + stream.status)
+        except subprocess.TimeoutExpired:
+            print("Timeout - FFProbeCheck - " + stream.stream_label)
+        except:
+            print("Error - FFProbeCheck - " + stream.stream_label)
         # we zijn klaar met deze queue opdracht
         _q.task_done()
 
@@ -65,7 +47,7 @@ def loop():
         threads.append(t)
 
     # we hebben nu alle streams en gaan ze op een queue zetten
-    for stream in [st for st in all_streams if st.httpstatuscode == None]:
+    for stream in [st for st in all_streams if st.status != 'OK']:
         _q.put(stream)
 
     # block until all tasks are done
@@ -92,7 +74,8 @@ print('totaal github-files: ' + str(count_stream_filenames))
 
 # we gaan alle streams per github-file toevoegen aan 1 grote lijst.
 all_streams = list()
-i = 0
+i = 0 # file teller
+j = 0 # stream teller
 for filename in github_stream_filenames:
     i = i + 1
     datafile = _hanssettings.get_data_from_github_file(filename)
@@ -100,31 +83,40 @@ for filename in github_stream_filenames:
     print(str(i) + ': ' + name)
     streams_datafile = _hanssettings.get_streams(datafile)
     for stream in streams_datafile:
-        all_streams.append(StreamObject(filename, name, stream['label'], stream['url'], stream['header']))
+        j = j + 1
+        all_streams.append(StreamObject(j, filename, name, stream['label'], stream['url'], stream['header']))
     # voor testen even met 4 files
-    if (i == 10):
+    if (i == 4):
         break
 
-sum_run0 = sum(st.httpstatuscode == None for st in all_streams)
+sum_run0 = sum(st.status != 'OK' for st in all_streams)
+print('Run0:' + str(sum_run0))
+print('---')
 
 _q = queue.Queue()
 loop()
-sum_run1 = sum(st.httpstatuscode == None for st in all_streams)
-
-_q = queue.Queue()
-_timeout = 5
-loop()
-sum_run2 = sum(st.httpstatuscode == None for st in all_streams)
+sum_run1 = sum(st.status != 'OK' for st in all_streams)
+print('Run1:' + str(sum_run1))
+print('---')
 
 _q = queue.Queue()
 _timeout = 10
 loop()
-sum_run3 = sum(st.httpstatuscode == None for st in all_streams)
+sum_run2 = sum(st.status != 'OK' for st in all_streams)
+print('Run2:' + str(sum_run2))
+print('---')
+
+_q = queue.Queue()
+_timeout = 30
+loop()
+sum_run3 = sum(st.status != 'OK' for st in all_streams)
+print('Run3:' + str(sum_run3))
+print('---')
 
 print('done queues')
 for stream in all_streams:
     # laat alle vreemde eenden zien, welke nu nog niet wilde
-    if (stream.httpstatuscode != 200):
+    if (stream.status != 'OK' != 200):
         print('---')
         print(stream.bouquet_name)
         print(stream.stream_label)

@@ -1,4 +1,4 @@
-import requests, queue, threading, sys, subprocess
+import requests, queue, threading, sys, subprocess, csv, os
 
 from resources.lib.hanssettings import HansSettings
 from streamcheck.lib.streamobject import StreamObject
@@ -105,8 +105,8 @@ for filename in github_stream_filenames:
         j = j + 1
         all_streams.append(StreamObject(j, filename, name, stream['label'], stream['url'], stream['header']))
     # voor testen even met 4 files
-    if (i == 4):
-        break
+    # if (i == 1):
+    #     break
 
 sum_run0 = sum(st.status != 'OK' for st in all_streams)
 print('Run0:' + str(sum_run0))
@@ -133,9 +133,32 @@ print('Run3:' + str(sum_run3))
 print('---')
 
 print('done queues')
+
+# https://www.geeksforgeeks.org/working-csv-files-python/
+
+filename_run = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../run.csv'))
+filename_run_not_ok = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../run_notok.csv'))
+create_run = open(filename_run, 'w', newline='')
+create_run_not_ok = open(filename_run_not_ok, 'w', newline='')
+# creating a csv writer object
+csvwriter_run = csv.writer(create_run, delimiter = ';')
+csvwriter_run_not_ok = csv.writer(create_run_not_ok, delimiter = ';')
+# writing the fields
+header = StreamObject.csvheader()
+csvwriter_run.writerow(header)
+csvwriter_run_not_ok.writerow(header)
+for stream in all_streams:
+    streamcsvdata = stream.csvrow()
+    csvwriter_run.writerow(streamcsvdata)
+    if (stream.status != 'OK'):
+        csvwriter_run_not_ok.writerow(streamcsvdata)
+#close
+create_run.close()
+create_run_not_ok.close()
+
 for stream in all_streams:
     # laat alle vreemde eenden zien, welke nu nog niet wilde
-    if (stream.status != 'OK' != 200):
+    if (stream.status != 'OK'):
         print('---')
         print(stream.bouquet_name)
         print(stream.stream_label)

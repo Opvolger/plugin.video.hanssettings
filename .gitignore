@@ -39,3 +39,4 @@ nosetests.xml
 *.orig
 *.rej
 /.vscode/*
+/check_data/*

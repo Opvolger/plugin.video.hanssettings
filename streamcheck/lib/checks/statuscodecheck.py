@@ -1,9 +1,9 @@
 import requests
+from streamcheck.lib.checks.basecheck import BaseCheck
 
-class StatusCodeCheck():
+class StatusCodeCheck(BaseCheck):
     def __init__(self, stream, timeout):
-        self.stream = stream
-        self.timeout = timeout
+        super().__init__(stream, timeout)
 
     def run(self):
         if (self.stream.stream_header):

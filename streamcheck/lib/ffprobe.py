@@ -48,7 +48,7 @@ class FFProbe:
         # https://www.blog.pythonlibrary.org/2016/05/17/python-101-how-to-timeout-a-subprocess/
         # https://docs.python.org/3/library/subprocess.html#subprocess.run
         # p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-        p = subprocess.run(cmd, capture_output=True, text=True, shell=True, timeout=timeout)
+        p = subprocess.run(cmd, capture_output=True, text=True, shell=False, timeout=timeout)
         self.format = None
         self.created = None
         self.duration = None

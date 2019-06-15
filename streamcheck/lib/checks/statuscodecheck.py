@@ -24,3 +24,4 @@ class StatusCodeCheck():
             # redirect, we schrijven de nieuwe url al vast weg
             self.stream.new_stream_url = response.url
             # print('new url: ' + r.url)
+        response.close()

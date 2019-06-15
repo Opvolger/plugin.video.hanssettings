@@ -25,6 +25,7 @@ class M3u8RedirectOr302():
             if (response.status_code == 302):
                 # redirect, we schrijven de nieuwe url alvast weg
                 self.stream.new_stream_url = response.url
+            response.close()
 
     def split_m3u8(self, split, response):
         regex = r'^[^#].*'

@@ -12,6 +12,9 @@ class StreamObject(object):
         self.new_stream_url = None
         self.new_stream_label = None
     
+    def debug_format(self, info: str):
+        print(str(self.id) + " " + self.bouquet_name + " " + info)
+
     def csvrow(self):
         csvrowlist = list()
         csvrowlist.append(self.bouquet_filename)

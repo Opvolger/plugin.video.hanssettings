@@ -154,8 +154,8 @@ else:
             j = j + 1
             all_streams.append(StreamObject(j, filename, name, stream['label'], stream['url'], stream['header']))
         # voor testen even met 4 files
-        if (i == 4):
-            break
+        # if (i == 4):
+        #     break
 
 # save alle data welke we nodig hebben, zodat we vanaf daar weer kunnen oppakken (als we crashen)
 save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)

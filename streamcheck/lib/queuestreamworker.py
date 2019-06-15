@@ -58,6 +58,9 @@ class QueueStreamWorker():
                 self.run_check(check)
             finally:
                 timer.cancel()
+                # ondanks de "kill" bij timeout, blijft de ffprobe "hangen", tot het process is gekilled.
+                # daarom deze timer, dat de werker wel weer vrij komt en we niet wachten op de kill, maar deze op de achtergrond dus nog door gaat
+                # dit is ook de reden dat het einde soms wat lang duurt. Er zit dan dus nog een process te wachten op zijn kill :)
                 del check
             # we zijn klaar met deze queue opdracht
             self.queue.task_done()

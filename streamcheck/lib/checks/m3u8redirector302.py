@@ -1,13 +1,15 @@
 import requests, re
 from urllib.parse import urlsplit
+
 from streamcheck.lib.checks.basecheck import BaseCheck
+from streamcheck.lib.streamobject import StreamObject
 
 class M3u8RedirectOr302(BaseCheck):
-    def __init__(self, stream, timeout):
+    def __init__(self, stream: StreamObject, timeout):
         super().__init__(stream, timeout)
 
     def run(self):
-        if (self.stream.status != 'OK'):
+        if (self.run_check()):
             if (self.stream.stream_header):
                 _key, _value = self.stream.stream_header.split('=')
                 headers = {_key : _value}

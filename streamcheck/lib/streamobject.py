@@ -7,13 +7,39 @@ class StreamObject(object):
         self.stream_header = stream_header
         self.stream_url = stream_url
         self.stream_label = stream_label
-        self.status = 'NOK'
+        self.status = 'DNC'
         self.httpstatuscode = None
         self.new_stream_url = None
         self.new_stream_label = None
+        self.timeout_checks = list()
     
     def debug_format(self, info=''):
         return str(self.id) + " " + self.stream_label + " " + self.bouquet_name + " " + info
+
+    def status_is_check_it(self):
+        status_to_check_list = ['DNC','CA','CT']
+        if (self.status in status_to_check_list):
+            return True
+        return False
+
+    def set_timeout_check(self, check_name):
+        self.timeout_checks.append(check_name)
+
+    def set_to_rerun(self):
+        self.status = 'CA'
+        self.timeout_checks = list()
+
+    def set_status(self, status):
+        # DNC = Did Not Check
+        # CA = Check Again
+        # NOK = Not Ok
+        # OK = Ok
+        # CT = CheckTimeout
+        status_list = ['DNC','CA','NOK','OK','CT']
+        if (status in status_list):
+            self.status = status
+        else:
+            raise Exception("Onbekende status")        
 
     def csvrow(self):
         csvrowlist = list()

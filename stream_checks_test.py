@@ -29,7 +29,7 @@ url = 'https://dpp-aldag-ochtendshow.akamaized.net/streamx/DeOchtendshow_540p.m3
 
 
 
-stream = StreamObject(1, 'test','test','label',url,None)
+stream = StreamObject(1, 'test','test','label','http://ssh101.com/m3u8/dyn/HALStadCentraal/index.m3u8',None)
 #stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/566/default.stream/masterchunklist_w1920042569.m3u8', None)
 #stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/721/default.stream/.m3u8',None)
 #M3u8RedirectOr302(stream, 5).run()

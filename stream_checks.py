@@ -5,6 +5,7 @@ from resources.lib.hanssettings import HansSettings
 from streamcheck.lib.queuestreamworker import QueueStreamWorker
 from streamcheck.lib.queuecountworker import QueueCounterWorker
 from streamcheck.lib.queueloggerworker import QueueLoggerWorker
+from streamcheck.lib.runstarter import RunStarter
 
 from streamcheck.lib.streamobject import StreamObject
 
@@ -24,69 +25,14 @@ def save_all_streams_to_object_file(version_dir: str, stream_dump_full: str, str
     with open(stream_dump_full_json, 'w') as stream_dump_file:  
         json.dump(all_streams, stream_dump_file, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-def loop(timeout, num_worker_threads):
-    queue_streams = queue.Queue()
-    queue_logging = queue.Queue()
-
-    sum_run0 = sum(st.status != 'OK' for st in all_streams)
- 
-    # we maken alvast wat workers welke wachten op vulling van de queue
-    # https://docs.python.org/3/library/queue.html
-    # https://docs.python.org/3/library/queue.html#queue.Queue.join
-    threads = []
-    for i in range(num_worker_threads):
-        worker = QueueStreamWorker(i + 1, queue_streams, queue_logging, timeout, num_worker_threads)
-        t = threading.Thread(target=worker.start)
-        t.start()
-        threads.append(t)
-
-    # we hebben nu alle streams en gaan ze op een queue zetten als ze nog niet OK zijn
-    start_nok_aantal = 0
-    for stream in [st for st in all_streams if st.status != 'OK']:
-        start_nok_aantal = start_nok_aantal + 1
-        queue_streams.put(stream)
-
-    print('---')
-    print('Run start met: ' + str(start_nok_aantal) + " NOK timeout: " + str(timeout))
-    print('---')
-
-    # toevoegen counter (hoeveel zitten er nog op de queue)
-    queue_counter_worker = QueueCounterWorker(queue_streams, queue_logging, start_nok_aantal, timeout)
-    t = threading.Thread(target=queue_counter_worker.start)
-    t.start()
-    threads.append(t)
-
-    # toevoegen van logger, deze is gemaakt omdat meerdere QueueStreamWorkers niet naar 1 output kan wegschrijven. ze schrijven over elkaar heen (soms)    
-    queue_logger_worker = QueueLoggerWorker(queue_logging)
-    thread_logger = threading.Thread(target=queue_logger_worker.start)
-    thread_logger.start()
-    
-    # block until all tasks are done
-    queue_streams.join()
-
-    # stop workers
-    for i in range(num_worker_threads):
-        queue_streams.put(None)
-    for t in threads:
-        t.join()
-
-    # alle stream-workders staan uit, dus er kan geen logging meer komen, block zolang er nog logging is.
-    queue_logging.join()
-    # stop de logging worker
-    queue_logging.put(None)
-    # wacht tot thread_logger is gestopt
-    thread_logger.join()
-    print('---')
-    print('Start/Stop: ' + str(start_nok_aantal) + "/" + str(sum(st.status != 'OK' for st in all_streams)) + " NOK timeout: " + str(timeout))
-    print('---')
-
 def write_to_csv():
     # https://www.geeksforgeeks.org/working-csv-files-python/
 
     filename_run = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../run.csv'))
     filename_run_not_ok = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../run_notok.csv'))
-    create_run = open(filename_run, 'w', newline='')
-    create_run_not_ok = open(filename_run_not_ok, 'w', newline='')
+    kw_args={'newline' : '','encoding' : 'utf_8_sig'}
+    create_run = open(filename_run, 'w', **kw_args)
+    create_run_not_ok = open(filename_run_not_ok, 'w', **kw_args)
     # creating a csv writer object
     csv_writer_run = csv.writer(create_run, delimiter = ';')
     csv_writer_run_not_ok = csv.writer(create_run_not_ok, delimiter = ';')
@@ -154,13 +100,19 @@ else:
             j = j + 1
             all_streams.append(StreamObject(j, filename, name, stream['label'], stream['url'], stream['header']))
         # voor testen even met 4 files
-        # if (i == 4):
-        #     break
+        if (i == 4):
+            break
 
 # save alle data welke we nodig hebben, zodat we vanaf daar weer kunnen oppakken (als we crashen)
 save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
 
-loop(30, 15)
+# soms loopt de thread met ffprobe even door. ffprode commando blijt hangen.
+# zoals op: ffprobe -show_streams http://ssh101.com/m3u8/dyn/HALStadCentraal/index.m3u8 -loglevel verbose
+# zie: https://docs.python.org/3/library/subprocess.html#module-subprocess stukje over timeout
+# hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
+runner = RunStarter(all_streams, 30, 10, 100)
+runner.start_run()
+
 
 # save alle data na een run
 save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)

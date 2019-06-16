@@ -1,38 +1,50 @@
 import requests, subprocess, threading, sys, time, ctypes
 
+from streamcheck.lib.streamobject import StreamObject
+
 from streamcheck.lib.checks.ffprobecheck import FFProbeCheck
 from streamcheck.lib.checks.statuscodecheck import StatusCodeCheck
 from streamcheck.lib.checks.m3u8redirector302 import M3u8RedirectOr302
 
 class CheckThread(threading.Thread): 
-    def __init__(self, worker_id, stream, queue_logging, timeout): 
+    def __init__(self, worker_id, stream: StreamObject, queue_logging, timeout): 
         threading.Thread.__init__(self)         
         self.timeout =  timeout
         self.stream = stream
         self.worker_id = worker_id
         self.queue_logging = queue_logging
+        self.stop = False
+        self.current_check_name = None
 
     def run_check(self, check):
-        try:
+        try:               
             # self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Start"))
+            self.current_check_name = check.__class__.__name__
             check.run()
         except requests.ConnectionError:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Failed to connect - " + check.__class__.__name__))
+            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Failed to connect - " + self.current_check_name))
         except subprocess.TimeoutExpired:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format( "Timeout - " + check.__class__.__name__))
+            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format( "Timeout - " + self.current_check_name))
         except:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Error - " + check.__class__.__name__))
+            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Error - " + self.current_check_name))
+        if (self.stop):
+            raise Exception("Ik moest al stoppen, ik ben timeout gegaan")
 
-    def run(self): 
+    def stop_run(self):
+        self.stop = True
+        self.stream.set_status('TT')
+        self.stream.set_timeout_check(self.current_check_name)
+
+    def run(self):
   
             # target function of the thread class 
-            try: 
-                # We proberen een http status-code te bepalen
-                check = StatusCodeCheck(self.stream, self.timeout)
-                self.run_check(check)
-                
+            try:               
                 # We doen een FFProbe controle
                 check = FFProbeCheck(self.stream, self.timeout)
+                self.run_check(check)
+
+                # We proberen een http status-code te bepalen
+                check = StatusCodeCheck(self.stream, self.timeout)
                 self.run_check(check)
 
                 # We kijken of er een redirect is in de M3U8-file
@@ -40,11 +52,15 @@ class CheckThread(threading.Thread):
                 self.run_check(check)
                 
                 # we controleren de redirect, misschien werkt deze wel.
-                check = FFProbeCheck(self.stream, self.timeout)
+                check = FFProbeCheck(self.stream, self.timeout)                
                 check.set_url(self.stream.new_stream_url)
-                self.run_check(check)                
+                self.run_check(check)
+
+                # we hebben alle checks gehad, we zijn dus NOK
+                if (self.stream.status_is_check_it()):
+                    self.stream.set_status('NOK')
             except:
-                print(self.stream.debug_format(" stuk gelopen"))
+                print(self.stream.debug_format("stuk gelopen"))
 
 
 # Deze class haalt opdrachten van de queue af en gaat controles draaien op de streams
@@ -74,8 +90,14 @@ class QueueStreamWorker():
                 # De queue is leeg.
                 break
             # we werken met een CheckThread, zodat we naar de timeout de nek om kunnen draaien van dit ding.
-            t1 = CheckThread(self.worker_id, stream, self.queue_logging, self.timeout) 
-            t1.start()
-            t1.join(self.timeout)
+            try:
+                t1 = CheckThread(self.worker_id, stream, self.queue_logging, self.timeout) 
+                t1.start()
+                t1.join(self.timeout)
+                if t1.is_alive():
+                    t1.stop_run()
+                    self.queue_logging.put(stream.debug_format("Loopt buiten timeout"))
+            except:
+                self.queue_logging.put(stream.debug_format("CheckThread starten mislukt."))
             # we zijn klaar met deze queue opdracht
             self.queue.task_done()

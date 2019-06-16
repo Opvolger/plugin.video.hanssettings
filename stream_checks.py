@@ -15,7 +15,7 @@ _stream_dump = 'all_stream_object_dump.xyz'
 _stream_dump_json = 'all_stream_object_dump.json'
 
 def save_all_streams_to_object_file(version_dir: str, stream_dump_full: str, stream_dump_full_json: str, all_streams: list):
-    print("save object")
+    queue_logging.put("save object")
     # schrijf alles voor/na een run weg in een file
     if not os.path.isdir(version_dir):
         # maak de data dir aan als deze er nog niet is
@@ -118,10 +118,12 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
 
 timeout = 30
+workers = 20
+aantal_in_bulk = 100
 
 aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 while (aantal_welke_nog_gechecked_moeten_worden > 0):
-    runner = RunStarter(all_streams, timeout, 10, 100, queue_logging)
+    runner = RunStarter(all_streams, timeout, workers, aantal_in_bulk, queue_logging)
     runner.start_run()
     # save alle data na een run
     save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)

@@ -75,14 +75,11 @@ class ChecksThread(threading.Thread):
             self.run_check(check)
 
             # we hebben alle checks gehad, we zijn dus NOK
-            if (self.stream.status_is_check_it()):
-                self.stop = True
+            if (self.stream.status_is_check_it()):                
                 self.stream.set_status('NOK')
+                self.stop = True
         except:
-            self.stop = True
-            self.stream.set_status('CT')
-            self.stream.set_timeout_check(self.current_check_name)                
-            print(self.stream.debug_format("stuk gelopen (was ooit timeout gegaan, mogelijk ffprobe kill gehad), kan van voorgaande run zijn!"))
+            self.queue_logging.put(self.stream.debug_format("stuk gelopen (was ooit timeout gegaan, mogelijk ffprobe kill gehad), kan van voorgaande run zijn!"))
 
 
 # Deze class haalt opdrachten van de queue af en gaat controles draaien op de streams

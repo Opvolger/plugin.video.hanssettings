@@ -41,7 +41,7 @@ class RunStarter():
             queue_streams.put(stream)
 
         # toevoegen counter (hoeveel zitten er nog op de queue)
-        queue_counter_worker = QueueCounterWorker(queue_streams, queue_logging, start_aantal, timeout)
+        queue_counter_worker = QueueCounterWorker(queue_streams, self.queue_logging, start_aantal, self.timeout)
         t = threading.Thread(target=queue_counter_worker.start, name='QueueCounterWorker')
         t.start()
         threads.append(t)

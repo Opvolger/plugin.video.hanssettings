@@ -5,7 +5,7 @@ from streamcheck.lib.checks.m3u8redirector302 import M3u8RedirectOr302
 
 import re
 
-#url = 'https://hls.streamonecloud.net/livestream/amlst:fDa32BaPi9r3/chunklist_b596.m3u8'
+url = 'https://dpp-aldag-ochtendshow.akamaized.net/streamx/DeOchtendshow_540p.m3u8'
 #url = 'http://109.236.85.100:8081/SilenceTV/live/playlist.m3u8'
 #url = 'rtmp://84.22.97.59:80/beverwijk/studio'
 #url = 'http://streams.uitzending.tv/centraal/centraal/chunklist_w1734214400.m3u8'
@@ -29,11 +29,11 @@ import re
 
 
 
-#stream = StreamObject(1, 'test','test','label','http://webcamserverdh.dyndns-remote.com:1935/live/ehtx2.stream/&mp4:playlist.m3u8',None)
-stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/566/default.stream/masterchunklist_w1920042569.m3u8', None)
+stream = StreamObject(1, 'test','test','label',url,None)
+#stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/566/default.stream/masterchunklist_w1920042569.m3u8', None)
 #stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/721/default.stream/.m3u8',None)
 #M3u8RedirectOr302(stream, 5).run()
 #print(stream.httpstatuscode)
 #print(stream.new_stream_url)
-FFProbeCheck(stream, 5).run()
+FFProbeCheck(stream, 30).run()
 print(stream.status)

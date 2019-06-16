@@ -59,7 +59,7 @@ def loop(timeout, num_worker_threads):
     # toevoegen van logger, deze is gemaakt omdat meerdere QueueStreamWorkers niet naar 1 output kan wegschrijven. ze schrijven over elkaar heen (soms)    
     queue_logger_worker = QueueLoggerWorker(queue_logging)
     thread_logger = threading.Thread(target=queue_logger_worker.start)
-    thread_logger.start()    
+    thread_logger.start()
     
     # block until all tasks are done
     queue_streams.join()

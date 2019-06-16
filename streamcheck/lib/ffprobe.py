@@ -10,6 +10,8 @@ import subprocess
 
 from threading import Timer
 
+from subprocess import PIPE, STDOUT, check_output
+
 #from ffprobe3.exceptions import FFProbeError
 class FFProbeError(Exception):
     pass
@@ -23,7 +25,7 @@ class FFProbe:
     def add_stream_from_output(self, output):
         # https://regex101.com/codegen?language=python
         regex = r'\[STREAM\](.*?)\[\/STREAM\]'
-        output_str = output.replace('\n','\\n').replace('\r','\\r') # eng
+        output_str = output.decode('ascii').replace('\n','\\n').replace('\r','\\r') # eng
         matches = re.finditer(regex, output_str)
         for matchNum, match in enumerate(matches, start=1):    
             for groupNum in range(0, len(match.groups())):
@@ -48,7 +50,8 @@ class FFProbe:
         # https://www.blog.pythonlibrary.org/2016/05/17/python-101-how-to-timeout-a-subprocess/
         # https://docs.python.org/3/library/subprocess.html#subprocess.run
         # p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-        p = subprocess.run(cmd, capture_output=True, text=True, shell=False, timeout=timeout)
+        p = subprocess.run(cmd, stdout=PIPE, stderr=PIPE, shell=True, timeout=timeout)
+        #p = check_output(cmd, stderr=STDOUT, timeout=timeout)
         self.format = None
         self.created = None
         self.duration = None

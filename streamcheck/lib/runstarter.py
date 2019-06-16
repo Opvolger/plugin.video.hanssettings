@@ -68,26 +68,26 @@ class RunStarter():
             cmd = ["taskkill", "/IM", "ffprobe.exe", "/F"]
         else:
             cmd = ["killall ffprobe"]
-        subprocess.run(cmd, shell=True, timeout=15)        
+        subprocess.run(cmd, shell=True, timeout=15)
         # kill alle openstaan threads
         # https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
         # thread zijn helemaal niet meer active, debugger heeft het mogelijk fout?
-        # while True:
-        #     # dictionary changed size during iteration
-        #     try:
-        #         # We ruimen alle ChecksThread* en gemaakte Thread-* op.
-        #         threadszijndood = True
-        #         for id, thread in threading._active.items():
-        #             if thread.name.startswith('ChecksThread') or thread.name.startswith('Thread-'):
-        #                 threadszijndood = False
-        #                 res = ctypes.pythonapi.PyThreadState_SetAsyncExc(id, ctypes.py_object(SystemExit))                         
-        #                 if res > 1: 
-        #                     ctypes.pythonapi.PyThreadState_SetAsyncExc(id, 0)
-        #                     print('Exception raise failure %s' % thread.name)
-        #         if threadszijndood:
-        #             break
-        #     except:
-        #         self.queue_logging.put("QueueStreamWorker op check ging niet goed.")        
+        while True:
+            # dictionary changed size during iteration
+            try:
+                # We ruimen alle ChecksThread* en gemaakte Thread-* op.
+                threadszijndood = True
+                for id, thread in threading._active.items():
+                    if thread.name.startswith('ChecksThread') or thread.name.startswith('Thread-'):
+                        threadszijndood = False
+                        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(id, ctypes.py_object(SystemExit))                         
+                        if res > 1: 
+                            ctypes.pythonapi.PyThreadState_SetAsyncExc(id, 0)
+                            print('Exception raise failure %s' % thread.name)
+                if threadszijndood:
+                    break
+            except:
+                self.queue_logging.put("QueueStreamWorker op check ging niet goed.")
 
         not_checked_run = sum(st.status_is_check_it() for st in all_streams_in_run)
         totaal_aantal_start = len(self.all_streams)

@@ -56,19 +56,19 @@ class HansSettings:
 
     def get_data_from_github_file_bouquets(self, content_type):
         # ophalen van bouquet met daarin alle stream files.
-        return self.get_data_from_github_file('bouquets.' + self.get_soort(content_type))
+        return self.get_data_from_github_file('bouquets.%s' % self.get_soort(content_type))
 
     def get_stream_files_from_bouguet(self, filedata, content_type):
         # het uitlezen van de githubfiles met streams erin (deze staan in de bouquets.* file)
         # deze los aanroep is gemaakt om caching mogelikj te maken.
         streamfiles = re.findall(
-            "(userbouquet.stream_.*." + self.get_soort(content_type) + ")", filedata)
+            '(userbouquet.stream_.*.%s)' % self.get_soort(content_type), filedata)
         return streamfiles
 
     def get_version_from_bouquet(self, filedata, content_type):
         # ophalen van de versie. zodat je de caching niet hoeft te versen.
         # niet meer ingebruik, nadat ik een standaard lin heb gebruikt voor caching.
-        versions = re.findall("userbouquet[.]gemaakt_(.*)." + self.get_soort(content_type), filedata)
+        versions = re.findall('userbouquet[.]gemaakt_(.*).%s' % self.get_soort(content_type), filedata)
         return versions[0]
 
     def get_name(self, filedata, filename):
@@ -127,9 +127,9 @@ class HansSettings:
             if "#" in streamadres:
                 streamadres, streamheader = streamadres.split('#')
                 url = streamadres.replace('%3a', ':')
-                stream_play = url + '|' + streamheader
+                stream_play = '%s|%s' % (url,streamheader)
             else:
-                stream_play = url + '|User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
+                stream_play = '%s|User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36' % url
             item = {'label': streamname,
                     'header': streamheader,
                     'stream': stream_play,

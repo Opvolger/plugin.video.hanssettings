@@ -60,7 +60,7 @@ github_stream_filenames = _hanssettings.get_stream_files_from_bouguet(stream_lis
 
 # totaal aantal streambestanden welke zijn op te halen van github.
 count_stream_filenames = len(github_stream_filenames)
-print('totaal github-files: ' + str(count_stream_filenames))
+print('totaal github-files: %d' % (count_stream_filenames))
 
 # version wordt niet meer juist gevuld
 # version = _hanssettings.get_version_from_bouquet(stream_list_github, content_type)
@@ -94,14 +94,14 @@ else:
         i = i + 1
         datafile = _hanssettings.get_data_from_github_file(filename)
         name = _hanssettings.get_name(datafile, filename)
-        print(str(i) + ': ' + name)
+        print('%d: %s' % (i, name))
         streams_datafile = _hanssettings.get_streams(datafile)
         for stream in streams_datafile:
             j = j + 1
             all_streams.append(StreamObject(j, filename, name, stream['label'], stream['url'], stream['header']))
         # voor testen even met 4 files
-        if (i == 4):
-            break
+        # if (i == 4):
+        #     break
 
 # save alle data welke we nodig hebben, zodat we vanaf daar weer kunnen oppakken (als we crashen)
 save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
@@ -110,13 +110,21 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # zoals op: ffprobe -show_streams http://ssh101.com/m3u8/dyn/HALStadCentraal/index.m3u8 -loglevel verbose
 # zie: https://docs.python.org/3/library/subprocess.html#module-subprocess stukje over timeout
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
-runner = RunStarter(all_streams, 30, 10, 100)
-runner.start_run()
 
+aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
+while (aantal_welke_nog_gechecked_moeten_worden > 0):
+    runner = RunStarter(all_streams, 30, 10, 100)
+    runner.start_run()
+    # save alle data na een run
+    save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
+    aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 
-# save alle data na een run
-save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
+print('Na checkes van in totaal: %d' % len(all_streams))
+for status in StreamObject.get_status_list():
+    status_aantal = sum(st.status == status for st in all_streams)
+    print('Status %s: %d' % (status, status_aantal))
 
+# we hebben alles verzameld, maak een csv
 write_to_csv()
 
 elapsed_time = time.time() - start_time

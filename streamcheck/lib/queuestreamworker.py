@@ -22,17 +22,17 @@ class CheckThread(threading.Thread):
             self.current_check_name = check.__class__.__name__
             check.run()
         except requests.ConnectionError:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Failed to connect - " + self.current_check_name))
+            self.queue_logging.put('%d %s' % (self.worker_id, check.stream.debug_format("Failed to connect - " + self.current_check_name)))
         except subprocess.TimeoutExpired:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format( "Timeout - " + self.current_check_name))
-        except:                
-            self.queue_logging.put(str(self.worker_id) + " " + check.stream.debug_format("Error - " + self.current_check_name))
+            self.queue_logging.put('%d %s' % (self.worker_id, check.stream.debug_format("Timeout - " + self.current_check_name)))            
+        except:
+            self.queue_logging.put('%d %s' % (self.worker_id, check.stream.debug_format("Error - " + self.current_check_name)))            
         if (self.stop):
             raise Exception("Ik moest al stoppen, ik ben timeout gegaan")
 
     def stop_run(self):
         self.stop = True
-        self.stream.set_status('TT')
+        self.stream.set_status('CT')
         self.stream.set_timeout_check(self.current_check_name)
 
     def run(self):
@@ -60,7 +60,7 @@ class CheckThread(threading.Thread):
                 if (self.stream.status_is_check_it()):
                     self.stream.set_status('NOK')
             except:
-                print(self.stream.debug_format("stuk gelopen"))
+                print(self.stream.debug_format("stuk gelopen (was ooit timeout gegaan, mogelijk ffprobe kill gehad), kan van voorgaande run zijn!"))
 
 
 # Deze class haalt opdrachten van de queue af en gaat controles draaien op de streams
@@ -75,7 +75,7 @@ class QueueStreamWorker():
 
     def quit_function(self, fn_name, check):
         # print to stderr, unbuffered in Python 2.
-        self.queue_logging.put('{0} took too long'.format(fn_name))
+        self.queue_logging.put('%s took too long' % (fn_name))
         # ondanks de "kill" bij timeout, blijft de ffprobe "hangen", tot het process is gekilled.
         # daarom deze timer, dat de werker wel weer vrij komt en we niet wachten op de kill, maar deze op de achtergrond dus nog door gaat
         # dit is ook de reden dat het einde soms wat lang duurt. Er zit dan dus nog een process te wachten op zijn kill :)
@@ -86,7 +86,6 @@ class QueueStreamWorker():
         while True:
             stream = self.queue.get()
             if stream is None:
-                self.queue_logging.put("QueueStreamWorker nummer (" + str(self.worker_id) + ") is gestopt: maar er zijn er wel " + str(self.workers_aantal))
                 # De queue is leeg.
                 break
             # we werken met een CheckThread, zodat we naar de timeout de nek om kunnen draaien van dit ding.

@@ -118,8 +118,8 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
 
 timeout = 30
-workers = 20
-aantal_in_bulk = 100
+workers = 15
+aantal_in_bulk = 50
 
 aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 while (aantal_welke_nog_gechecked_moeten_worden > 0):
@@ -135,9 +135,9 @@ for status in StreamObject.get_status_list():
     queue_logging.put('Status %s: %d' % (status, status_aantal))
 
 # tijdelijk alles alvast op rerun
-# for stream in [st for st in all_streams if st.status_is_rerun_candidate()]:
-#     stream.set_to_rerun()
-# save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
+for stream in [st for st in all_streams if st.status_is_rerun_candidate()]:
+    stream.set_to_rerun()
+save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
 
 # we hebben alles verzameld, maak een csv
 write_to_csv()
@@ -146,12 +146,7 @@ elapsed_time = time.time() - start_time
 
 queue_logging.put(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
-# mogelijk timeout van thread mee rekenen
-for i in range(timeout):
-    time.sleep(1)
-    queue_logging.put("QueueLoggerWorker stopt in %d seconden" % (timeout - i))
 # alle runs zijn klaar, dus er kan geen logging meer komen, block zolang er nog logging is.
-queue_logging.join()
 # stop de logging worker
 queue_logging.put(None)
 # wacht tot thread_logger is gestopt

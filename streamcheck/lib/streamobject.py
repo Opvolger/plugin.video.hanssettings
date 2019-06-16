@@ -32,6 +32,12 @@ class StreamObject(object):
             return True
         return False
 
+    def status_is_rerun_candidate(self):
+        status_to_check_list = ['NOK']
+        if (self.status in status_to_check_list):
+            return True
+        return False
+
     def set_timeout_check(self, check_name):
         self.timeout_checks.append(check_name)
 

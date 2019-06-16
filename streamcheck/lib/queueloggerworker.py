@@ -8,7 +8,7 @@ class QueueLoggerWorker():
         while True:
             logregel = self.queue.get()
             if logregel is None:
-                # print("QueueLoggerWorker - Er komt geen logging meer, ik ga uit")
+                print("QueueLoggerWorker - Er komt geen logging meer, ik ga uit")
                 # De queue is leeg.
                 break
             print(logregel)

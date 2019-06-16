@@ -16,6 +16,4 @@ class QueueCounterWorker():
             self.queue_logging.put("Aantal op de queue (bij benadering) is: %d/%d" % (size, self.totaal))
             time.sleep(30)
             if (size == 0):
-                self.queue_logging.put("QueueCounterWorker gaat stoppen: maar er is nog een timeout van %d seconden per worker!" % self.timeout)
-                self.queue_logging.put("QueueCounterWorker stopt")
                 break

@@ -49,9 +49,15 @@ def write_to_csv():
     create_run.close()
     create_run_not_ok.close()
 
+queue_logging = queue.Queue()
 start_time = time.time()
 
-print('\n\n')
+# toevoegen van logger, deze is gemaakt omdat meerdere QueueStreamWorkers niet naar 1 output kan wegschrijven. ze schrijven over elkaar heen (soms)    
+queue_logger_worker = QueueLoggerWorker(queue_logging)
+thread_logger = threading.Thread(target=queue_logger_worker.start, name='QueueLoggerWorker')
+thread_logger.start()
+
+queue_logging.put('\n\n')
 content_type = 'tv'
 
 # ophalen alle bestandsnamen welke we kunnen ophalen in github.
@@ -60,7 +66,7 @@ github_stream_filenames = _hanssettings.get_stream_files_from_bouguet(stream_lis
 
 # totaal aantal streambestanden welke zijn op te halen van github.
 count_stream_filenames = len(github_stream_filenames)
-print('totaal github-files: %d' % (count_stream_filenames))
+queue_logging.put('totaal github-files: %d' % (count_stream_filenames))
 
 # version wordt niet meer juist gevuld
 # version = _hanssettings.get_version_from_bouquet(stream_list_github, content_type)
@@ -94,7 +100,7 @@ else:
         i = i + 1
         datafile = _hanssettings.get_data_from_github_file(filename)
         name = _hanssettings.get_name(datafile, filename)
-        print('%d: %s' % (i, name))
+        queue_logging.put('%d: %s' % (i, name))
         streams_datafile = _hanssettings.get_streams(datafile)
         for stream in streams_datafile:
             j = j + 1
@@ -111,22 +117,40 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # zie: https://docs.python.org/3/library/subprocess.html#module-subprocess stukje over timeout
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
 
+timeout = 30
+
 aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 while (aantal_welke_nog_gechecked_moeten_worden > 0):
-    runner = RunStarter(all_streams, 30, 10, 100)
+    runner = RunStarter(all_streams, timeout, 10, 100, queue_logging)
     runner.start_run()
     # save alle data na een run
     save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
     aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 
-print('Na checkes van in totaal: %d' % len(all_streams))
+queue_logging.put('Na checkes van in totaal: %d' % len(all_streams))
 for status in StreamObject.get_status_list():
     status_aantal = sum(st.status == status for st in all_streams)
-    print('Status %s: %d' % (status, status_aantal))
+    queue_logging.put('Status %s: %d' % (status, status_aantal))
+
+# tijdelijk alles alvast op rerun
+# for stream in [st for st in all_streams if st.status_is_rerun_candidate()]:
+#     stream.set_to_rerun()
+# save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
 
 # we hebben alles verzameld, maak een csv
 write_to_csv()
 
 elapsed_time = time.time() - start_time
 
-print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+queue_logging.put(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+
+# mogelijk timeout van thread mee rekenen
+for i in range(timeout):
+    time.sleep(1)
+    queue_logging.put("QueueLoggerWorker stopt in %d seconden" % (timeout - i))
+# alle runs zijn klaar, dus er kan geen logging meer komen, block zolang er nog logging is.
+queue_logging.join()
+# stop de logging worker
+queue_logging.put(None)
+# wacht tot thread_logger is gestopt
+thread_logger.join()

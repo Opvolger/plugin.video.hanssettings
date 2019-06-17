@@ -1,4 +1,4 @@
-import requests, sys, threading
+import sys, threading
 import _thread as thread
 from abc import ABC, abstractmethod
 

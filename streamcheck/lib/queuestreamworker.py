@@ -130,5 +130,5 @@ class QueueStreamWorker():
                         t.error()
                 except:
                     self.queue_logging.put("ChecksThread error gegeven. (Timeout?)")
-                t.join() # queue taak is klaar, maar we wachten nog even op thread(s)
+                t.join(self.timeout) # queue taak is klaar, maar we wachten nog even op thread(s)
             break

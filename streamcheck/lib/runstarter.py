@@ -4,6 +4,7 @@ from subprocess import PIPE, STDOUT, check_output
 
 from streamcheck.lib.queuestreamworker import QueueStreamWorker
 from streamcheck.lib.queuecountworker import QueueCounterWorker
+from streamcheck.lib.queuekilltasksworker import QueueKillTasksWorker
 from streamcheck.lib.queueloggerworker import QueueLoggerWorker
 
 class RunStarter():
@@ -34,16 +35,17 @@ class RunStarter():
         for stream in [st for st in self.all_streams if st.status_is_check_it()]:
             start_aantal = start_aantal + 1
             all_streams_in_run.append(stream)
-            if (start_aantal >= self.queue_aantal):
-                # we stoppen met x items op de queue (in delen)
-                break
             queue_streams.put(stream)
 
         # toevoegen counter (hoeveel zitten er nog op de queue weergave)
         queue_counter_worker = QueueCounterWorker(queue_streams, self.queue_logging, start_aantal, self.timeout)
-        t = threading.Thread(target=queue_counter_worker.start, name='QueueCounterWorker')
-        t.start()
-        threads.append(t)
+        counter_thread = threading.Thread(target=queue_counter_worker.start, name='QueueCounterWorker')
+        counter_thread.start()
+
+        # toevoegen om ffprobe te killen welke vast zitten
+        queue_counter_worker = QueueKillTasksWorker(queue_streams, self.queue_logging, self.timeout)
+        killer_thread = threading.Thread(target=queue_counter_worker.start, name='QueueKillTasksWorker')
+        killer_thread.start()        
 
         self.queue_logging.put('---')
         self.queue_logging.put('Run start met: %d, timeout: %d' % (start_aantal, self.timeout))
@@ -55,21 +57,15 @@ class RunStarter():
         # stop workers
         for i in range(self.num_worker_threads):
             queue_streams.put(None)
-        while True:
-            if (queue_streams.qsize() == 0):
-                # we hebben alles nu verwerkt, we wachten alleen nog op threads welke open blijven door ffprobe.exe
-                self.queue_logging.put("we gaan nu ffprode-processen welke 'hangen' killen")
-                if str(platform.system()) == 'Windows':
-                    cmd = ["powershell", "-command", "Get-Process ffprobe | Where StartTime -lt (Get-Date).AddMinutes(-2) | Stop-Process -Force"]
-                else:
-                    cmd = ["killall ffprobe --older-than 2m"]
-                subprocess.run(cmd, shell=True, timeout=15)           
-                break                
         self.queue_logging.put('---')
         # echt stoppen van threads (en sub-threads er onder)
         for t in threads:
             t.join()
         self.queue_logging.put("QueueStreamWorkers zijn gestopt")
+        # counter zal ook wel gestopt zijn
+        counter_thread.join()
+        # taskkiller kan ook gestopt worden
+        killer_thread.join()
 
         not_checked_run = sum(st.status_is_check_it() for st in all_streams_in_run)
         totaal_aantal_start = len(self.all_streams)

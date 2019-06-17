@@ -118,12 +118,14 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
 
 timeout = 30
-workers = 5
-aantal_in_bulk = 100
+workers = 30
+#aantal_in_bulk = 5545
 
 aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
+
+# mogelijk nog een dump doen om de x items
 while (aantal_welke_nog_gechecked_moeten_worden > 0):
-    runner = RunStarter(all_streams, timeout, workers, aantal_in_bulk, queue_logging)
+    runner = RunStarter(all_streams, timeout, workers, aantal_welke_nog_gechecked_moeten_worden, queue_logging)
     runner.start_run()
     # save alle data na een run
     save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
@@ -135,9 +137,9 @@ for status in StreamObject.get_status_list():
     queue_logging.put('Status %s: %d' % (status, status_aantal))
 
 # tijdelijk alles alvast op rerun
-for stream in [st for st in all_streams if st.status_is_rerun_candidate()]:
-    stream.set_to_rerun()
-save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
+# for stream in [st for st in all_streams if st.status_is_rerun_candidate()]:
+#     stream.set_to_rerun()
+# save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_json, all_streams)
 
 # we hebben alles verzameld, maak een csv
 write_to_csv()

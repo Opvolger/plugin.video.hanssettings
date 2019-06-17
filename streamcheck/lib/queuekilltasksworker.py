@@ -2,30 +2,27 @@ import time, platform, subprocess
 
 
 # Deze class laat elke 30 seconden zien hoeveel items er nog op de queue staan
-class QueueCounterWorker():
+class QueueKillTasksWorker():
 
-    def __init__(self, queue, queue_logging, totaal, timeout):
+    def __init__(self, queue, queue_logging, timeout):
         self.queue = queue
-        self.totaal = totaal
         self.timeout = timeout
         self.queue_logging = queue_logging
 
     def start(self):
         while True:
             size = self.queue.qsize()
-            self.queue_logging.put("Aantal op de queue (bij benadering) is: %d/%d" % (size, self.totaal))
-            percentage_te_doen = int(100 / float(self.totaal) * size)
-            self.queue_logging.put('%d%% te doen' % percentage_te_doen)
-            time.sleep(15)
+            time.sleep(self.timeout + 3) # zodat hij ook nog de processen killed welke worden opgepakt als size == 0
             # dit hoort hier niet, maar af en toe hangende ffprobe killen
             try:
                 self.queue_logging.put("we gaan nu ffprode-processen welke 'hangen' killen")
                 if str(platform.system()) == 'Windows':
-                    cmd = ["powershell", "-command", "Get-Process ffprobe | Where StartTime -lt (Get-Date).AddMinutes(-4) | Stop-Process -Force"]
+                    cmd = ["powershell", "-command", "Get-Process ffprobe | Where StartTime -lt (Get-Date).AddMinutes(-%d) | Stop-Process -Force" % (self.time * 2)]
                 else:
-                    cmd = ["killall ffprobe --older-than 4m"]
+                    cmd = ["killall ffprobe --older-than %dm" % (self.timeout * 2)]
                 subprocess.run(cmd, shell=True, timeout=15)
             except:
                 self.queue_logging.put('killen van ffprode mislukt')
             if (size == 0):
-                break
+                # we hebben al een sleep en kill gedaan, dus moet nu wel kunnen stoppen
+                break                

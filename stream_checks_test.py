@@ -35,10 +35,15 @@ url = 'rtmp://kamera.task.gda.pl/rtplive playpath=k015.sdp swfUrl=http://task.gd
 #stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/566/default.stream/masterchunklist_w1920042569.m3u8', None)
 #stream = StreamObject(1, 'test','test','label','http://ipv4.api.nos.nl/resolve.php/livestream?url=/live/npo/thematv/journaal24/journaal24.isml/.m3u8',None) #OK
 #url = 'http://ipv4.api.nos.nl/resolve.php/livestream?url=/live/npo/thematv/journaal24/journaal24.isml/.m3u8' # OK
+url = 'https://streaming01.divercom.be/notele_live/_definst_/direct.stream/chunklist_w1342170057.m3u8'
 stream = StreamObject(1, 'test','test','label',url,None) 
-#M3u8RedirectOr302(stream, 5).run()
+
 #print(stream.httpstatuscode)
-#print(stream.new_stream_url)
+print(stream.new_stream_url)
 FFProbeCheck(stream, 30).run()
-#StatusCodeCheck(stream, 30).run()
+StatusCodeCheck(stream, 30).run()
+M3u8RedirectOr302(stream, 5).run()
+check = FFProbeCheck(stream, 30)
+check.set_url(stream.new_stream_url)
+check.run()
 print(stream.status)

@@ -30,10 +30,15 @@ url = 'https://dpp-aldag-ochtendshow.akamaized.net/streamx/DeOchtendshow_540p.m3
 
 
 stream = StreamObject(1, 'test','test','label','http://ssh101.com/m3u8/dyn/HALStadCentraal/index.m3u8',None)
+url = 'rtmp://kamera.task.gda.pl/rtplive playpath=k015.sdp swfUrl=http://task.gda.pl/tech/uslugi/stream/kamera_player/player.swf?213 pageUrl=http://www.task.gda.pl/uslugi/stream/kamera_gdynia_skwer_kosciuszki live=1'
+#url = 'rtmp://cam.nsprozor.com/kamere/live/BeogradskiKej.2.stream'
 #stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/566/default.stream/masterchunklist_w1920042569.m3u8', None)
-#stream = StreamObject(1, 'test','test','label','http://srv13.arkasis.nl:/721/default.stream/.m3u8',None)
+#stream = StreamObject(1, 'test','test','label','http://ipv4.api.nos.nl/resolve.php/livestream?url=/live/npo/thematv/journaal24/journaal24.isml/.m3u8',None) #OK
+#url = 'http://ipv4.api.nos.nl/resolve.php/livestream?url=/live/npo/thematv/journaal24/journaal24.isml/.m3u8' # OK
+stream = StreamObject(1, 'test','test','label',url,None) 
 #M3u8RedirectOr302(stream, 5).run()
 #print(stream.httpstatuscode)
 #print(stream.new_stream_url)
 FFProbeCheck(stream, 30).run()
+#StatusCodeCheck(stream, 30).run()
 print(stream.status)

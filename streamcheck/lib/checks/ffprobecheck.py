@@ -14,7 +14,10 @@ class FFProbeCheck(BaseCheck):
         self.url = url
     
     def run(self):
-        if (self.url and self.run_check()):
+        # tegen gaan van rtmp://kamera.task.gda.pl/rtplive playpath=k015.sdp swfUrl=http://task.gda.pl/tech/uslugi/stream/kamera_player/player.swf?213 pageUrl=http://www.task.gda.pl/uslugi/stream/kamera_gdynia_skwer_kosciuszki live=1        
+        # if (self.url.startswith('rtmp://') and ' playpath=' in self.url):
+        #    return
+        if (self.run_check()):
             metadata=FFProbe(self.url, self.timeout)
             for probe_stream in metadata.streams:
                 if probe_stream.is_video():

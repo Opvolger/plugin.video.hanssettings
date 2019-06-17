@@ -8,6 +8,9 @@ class StatusCodeCheck(BaseCheck):
         super().__init__(stream, timeout)
 
     def run(self):
+        # voorkom: No connection adapters were found for 'rtmp://cam.nsprozor.com/kamere/live/BeogradskiKej.2.stream'
+        if (self.stream.stream_url.startswith('rtmp://')):
+            return
         if (self.run_check()):
             if (self.stream.stream_header):
                 _key, _value = self.stream.stream_header.split('=')

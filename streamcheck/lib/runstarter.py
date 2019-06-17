@@ -60,9 +60,9 @@ class RunStarter():
                 # we hebben alles nu verwerkt, we wachten alleen nog op threads welke open blijven door ffprobe.exe
                 self.queue_logging.put("we gaan nu ffprode-processen welke 'hangen' killen")
                 if str(platform.system()) == 'Windows':
-                    cmd = ["taskkill", "/IM", "ffprobe.exe", "/F"]
+                    cmd = ["powershell", "-command", "Get-Process ffprobe | Where StartTime -lt (Get-Date).AddMinutes(-2) | Stop-Process -Force"]
                 else:
-                    cmd = ["killall ffprobe"]
+                    cmd = ["killall ffprobe --older-than 2m"]
                 subprocess.run(cmd, shell=True, timeout=15)           
                 break                
         self.queue_logging.put('---')

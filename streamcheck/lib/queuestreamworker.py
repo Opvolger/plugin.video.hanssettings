@@ -53,6 +53,9 @@ class ChecksThread(threading.Thread):
             self.queue_logging.put(self.stream.debug_format("Loopt buiten timeout"))
             # raise ChecksThreadTimeoutException("Ik moest al stoppen, ik ben timeout gegaan")
 
+    def error(self):
+        raise ChecksThreadTimeoutException("Ik moest al stoppen, ik ben timeout gegaan")
+
     def run(self):
         """Functie welke de ChecksThread start
 
@@ -102,6 +105,7 @@ class QueueStreamWorker():
     def start(self):
         """Deze start zal een ChecksThread starten met een timeout.
         """
+        array_of_timeout_checksthreads = []
         while True:
             stream = self.queue.get()
             if stream is None:
@@ -118,4 +122,13 @@ class QueueStreamWorker():
             finally:                
                 # we zijn klaar met deze queue opdracht
                 self.queue.task_done()
-                t1.join() # queue taak is klaar, maar we wachten nog even op thread
+                array_of_timeout_checksthreads.append(t1) # toevoegen aan lijst, hier wachten we later op. (anders loopt worker niet meer queue leeg te halen)
+        while True:            
+            for t in array_of_timeout_checksthreads:                    
+                try:
+                    if t.is_alive():
+                        t.error()
+                except:
+                    self.queue_logging.put("ChecksThread error gegeven. (Timeout?)")
+                t.join() # queue taak is klaar, maar we wachten nog even op thread(s)
+            break

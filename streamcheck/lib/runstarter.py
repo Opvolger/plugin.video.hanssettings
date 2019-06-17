@@ -103,4 +103,5 @@ class RunStarter():
         self.queue_logging.put('RunTotaal/NietVoltooit: %d/%d met timeout: %d' % (start_aantal, not_checked_run, self.timeout))
         self.queue_logging.put('Totaal/Nog Te doen in volgende run(s): %d/%d met timeout: %d' % (totaal_aantal_start, not_checked_totaal, self.timeout))
         self.queue_logging.put('%d%% te doen' % percentage_te_doen)
+        self.queue_logging.put('%d aantal thread' % threading.active_count())
         self.queue_logging.put('---')

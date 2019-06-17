@@ -118,8 +118,8 @@ save_all_streams_to_object_file(version_dir, stream_dump_full, stream_dump_full_
 # hierdoor lopen de threads vol. Vandaar deze tussen pauzes.
 
 timeout = 30
-workers = 10
-aantal_in_bulk = 200
+workers = 15
+aantal_in_bulk = 500
 
 aantal_welke_nog_gechecked_moeten_worden = sum(st.status_is_check_it() for st in all_streams)
 while (aantal_welke_nog_gechecked_moeten_worden > 0):

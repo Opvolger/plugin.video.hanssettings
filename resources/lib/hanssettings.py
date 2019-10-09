@@ -18,10 +18,10 @@ import json
 from datetime import datetime
 if (sys.version_info[0] == 3):
     # For Python 3.0 and later
-    from urllib.request import urlopen, Request
+    from urllib.request import urlopen, Request, HTTPError
 else:
     # Fall back to Python 2's urllib2
-    from urllib2 import urlopen, Request
+    from urllib2 import urlopen, Request, HTTPError
 
 PY3 = False
 
@@ -47,7 +47,11 @@ class HansSettings:
         req.add_header(
             'User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
         req.add_header('Content-Type', 'text/html; charset=utf-8')
-        response = urlopen(req)
+        try:
+            response = urlopen(req)
+        except HTTPError as err:
+            if err.code == 404:
+                return '' # kan voorkomen als de file niet aanwezig is op de github repo
         filedata = response.read()
         if (self.PY3):
             filedata = filedata.decode('utf-8', 'backslashreplace')

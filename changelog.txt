@@ -1,4 +1,7 @@
-﻿﻿Version 2.2.2
+﻿﻿Version 2.2.3
+* Fix the 404 Not Found Error
+
+Version 2.2.2
 * add comment and fix processbar, refactor code and renames in code
 
 Version 2.2.0

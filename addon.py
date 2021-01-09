@@ -27,6 +27,7 @@ else:
     try:
         import StorageServer
     except:
+        xbmc.log('Using storageserverdummy', xbmc.LOGINFO)
         import storageserverdummy as StorageServer
 
 PLUGIN_NAME = 'hanssettings'
@@ -93,8 +94,12 @@ def list_categories(content_type):
 
         # python2 int delen door int = altijd een int, dus eerst omzetten naar een float
         # percentage bepaling
-        progress.update(int(100 / float(count_stream_filenames) * i),
-                        "", progressText)
+        if (sys.version_info[0] == 3):
+            progress.update(int(100 / float(count_stream_filenames) * i),
+                            progressText)
+        else:
+            progress.update(int(100 / float(count_stream_filenames) * i),
+                            "",progressText)
         if progress.iscanceled():
             # als iemand de progress-bar stopt, dan alleen laten zien wat je al hebt, spring uit deze loop.
             break

@@ -1,5 +1,5 @@
 ﻿﻿Version 2.2.4
-* Support Kodi (Martix) 19
+* Support Kodi (Matrix) 19
 
 Version 2.2.3
 * Fix the 404 Not Found Error

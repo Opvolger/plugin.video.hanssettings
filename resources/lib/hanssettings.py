@@ -54,6 +54,8 @@ class HansSettings:
             except HTTPError as err:
                 if err.code == 404:
                     return '' # kan voorkomen als de file niet aanwezig is op de github repo
+            except:
+                continue
             else:
                 break
         else:

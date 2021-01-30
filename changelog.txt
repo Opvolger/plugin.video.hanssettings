@@ -1,4 +1,7 @@
-﻿﻿Version 2.2.5
+﻿﻿Version 2.2.6
+* Fix for 2.2.5
+
+Version 2.2.5
 * Retry download
 
 Version 2.2.4

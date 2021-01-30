@@ -47,11 +47,18 @@ class HansSettings:
         req.add_header(
             'User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
         req.add_header('Content-Type', 'text/html; charset=utf-8')
-        try:
+
+        for attempt in range(10):
+            try:
+                response = urlopen(req)
+            except HTTPError as err:
+                if err.code == 404:
+                    return '' # kan voorkomen als de file niet aanwezig is op de github repo
+            else:
+                break
+        else:
+            # we failed all the attempts - deal with the consequences.
             response = urlopen(req)
-        except HTTPError as err:
-            if err.code == 404:
-                return '' # kan voorkomen als de file niet aanwezig is op de github repo
         filedata = response.read()
         if (self.PY3):
             filedata = filedata.decode('utf-8', 'backslashreplace')

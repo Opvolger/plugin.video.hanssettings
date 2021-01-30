@@ -5,7 +5,7 @@ h = resources.lib.hanssettings.HansSettings()
 print(h)
 
 if (h):
-    #print(h.get_overzicht(h.get_dataoverzicht()))
+    print(h.get_data_from_github_file_bouquets('tv'))
     print('\n\n')
     filedata = h.get_data_from_github_file('userbouquet.stream_muziek.tv')
     #filedata = h.get_datafromfilegithub('userbouquet.stream_nl_nationaal.tv')

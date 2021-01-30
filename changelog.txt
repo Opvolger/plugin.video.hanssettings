@@ -1,4 +1,7 @@
-﻿﻿Version 2.2.4
+﻿﻿Version 2.2.5
+* Retry download
+
+Version 2.2.4
 * Support Kodi (Matrix) 19
 
 Version 2.2.3

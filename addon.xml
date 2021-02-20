@@ -18,8 +18,8 @@
     <summary lang="nl_NL">Kanalenlijst Hans - Bekijk gratis streams van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</summary>
     <description lang="en_GB">Kanalenlijst Hans (but then only the streams) - View free streams from collected lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
     <description lang="nl_NL">Kanalenlijst Hans (maar dan alleen de streams) - Bekijk gratis streams van de lib https://www.detransponder.nl/downloads-2/kanalenlijsten/</description>
-  </extension>
   <assets>
     <icon>icon.png</icon>
   </assets>
+  </extension>
 </addon>

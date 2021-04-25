@@ -22,7 +22,7 @@ def text_for_bouquet(text):
     return text
 
 
-def get_json(url):
+def get_steam_objects(url):
     response = urlopen(url)
 
     plain_data = response.read()
@@ -36,7 +36,7 @@ def get_json(url):
     return stream_elements
 
 def pluto_tv():
-    pluto_tv_elements = get_json("https://i.mjh.nz/PlutoTV/all.json")
+    pluto_tv_elements = get_steam_objects("https://i.mjh.nz/PlutoTV/all.json")
 
     # nu sorteren we de plat geslagen data
     pluto_tv_elements.sort(key=lambda x: (x['group'], x['name']))
@@ -54,7 +54,7 @@ def pluto_tv():
             f.write('#DESCRIPTION %s %s\n' % (chno, text_for_bouquet(item['name'])))
 
 def stirr():
-    stirr_elements = get_json("https://i.mjh.nz/Stirr/stations.json")
+    stirr_elements = get_steam_objects("https://i.mjh.nz/Stirr/stations.json")
 
     # nu sorteren we de plat geslagen data
     stirr_elements.sort(key=lambda x: (x['chno']))

@@ -6,21 +6,24 @@ if sys.version_info.major == 3:
 else:
     from urllib import urlopen
 
-def create_url_for_bouquet(url, header = None):
-    url = url.replace(':','%3a')
-    if header != None:
-        header = header.replace(':','%3a')
-        return '%s#%s' % (url, header)
-    return url
+class BouquetHelper():
 
-def text_for_bouquet(text):
-    # python2 bytes to string
-    if sys.version_info.major == 2:
-        text = text.encode('utf-8')
-    # escape
-    text = text.replace(':','%3a')
-    return text
-
+    @staticmethod
+    def create_url_for_bouquet(url, header = None):
+        url = url.replace(':','%3a')
+        if header != None:
+            header = header.replace(':','%3a')
+            return '%s#%s' % (url, header)
+        return url
+    
+    @staticmethod
+    def text_for_bouquet(text):
+        # python2 bytes to string
+        if sys.version_info.major == 2:
+            text = text.encode('utf-8')
+        # escape
+        text = text.replace(':','%3a')
+        return text
 
 def get_steam_objects(url):
     response = urlopen(url)
@@ -49,9 +52,9 @@ def pluto_tv():
             chno = str(item['chno'])
             if group != item['group']:
                 group = item['group']
-                f.write('#DESCRIPTION %s\n' % (text_for_bouquet(group)))
-            f.write('#SERVICE 4097:0:1:0:0:0:0:0:0:0:%s:%s %s\n' % (create_url_for_bouquet(text_for_bouquet(item['url'])), chno, text_for_bouquet(item['name'])))
-            f.write('#DESCRIPTION %s %s\n' % (chno, text_for_bouquet(item['name'])))
+                f.write('#DESCRIPTION %s\n' % (BouquetHelper.text_for_bouquet(group)))
+            f.write('#SERVICE 4097:0:1:0:0:0:0:0:0:0:%s:%s %s\n' % (BouquetHelper.create_url_for_bouquet(BouquetHelper.text_for_bouquet(item['url'])), chno, BouquetHelper.text_for_bouquet(item['name'])))
+            f.write('#DESCRIPTION %s %s\n' % (chno, BouquetHelper.text_for_bouquet(item['name'])))
 
 def stirr():
     stirr_elements = get_steam_objects("https://i.mjh.nz/Stirr/stations.json")
@@ -62,11 +65,10 @@ def stirr():
     with open('output_stirr.tv', 'w') as f:
         f.write('#NAME Stream STIRR TV\n')
         f.write('#SERVICE 1:64:197a:0:0:0:0:0:0:0:\n')
-        group = None
         for item in stirr_elements:
             chno = str(item['chno'])
-            f.write('#SERVICE 4097:0:1:0:0:0:0:0:0:0:%s:%s %s\n' % (create_url_for_bouquet(text_for_bouquet(item['url'])), chno, text_for_bouquet(item['name'])))
-            f.write('#DESCRIPTION %s %s\n' % (chno, text_for_bouquet(item['name'])))
+            f.write('#SERVICE 4097:0:1:0:0:0:0:0:0:0:%s:%s %s\n' % (BouquetHelper.create_url_for_bouquet(BouquetHelper.text_for_bouquet(item['url'])), chno, BouquetHelper.text_for_bouquet(item['name'])))
+            f.write('#DESCRIPTION %s %s\n' % (chno, BouquetHelper.text_for_bouquet(item['name'])))
 
 if __name__ == "__main__":
     pluto_tv()

@@ -40,3 +40,5 @@ nosetests.xml
 *.rej
 /.vscode/*
 /check_data/*
+output_pluto.tv
+output_stirr.tv

@@ -42,7 +42,7 @@ class HansSettings:
         return 'tv'
 
     def get_data_from_github_file(self, github_file):
-        url = 'https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'
+        url = 'https://raw.githubusercontent.com/Opvolger/kanalenlijst_hans_sync/master/e2_hanssettings_kabelNL/'
         req = Request(url + github_file)
         req.add_header(
             'User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')

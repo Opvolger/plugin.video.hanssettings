@@ -1,4 +1,10 @@
-﻿﻿Version 2.2.6
+﻿﻿Version 2.2.8
+* URL source changed
+
+Version 2.2.7
+* 404 fix
+
+Version 2.2.6
 * Fix for 2.2.5
 
 Version 2.2.5

@@ -42,3 +42,5 @@ nosetests.xml
 /check_data/*
 output_pluto.tv
 output_stirr.tv
+resources/lib/e2_hanssettings_kabelNL/**
+resources/lib/**.zip

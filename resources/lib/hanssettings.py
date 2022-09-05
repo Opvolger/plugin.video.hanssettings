@@ -14,8 +14,9 @@ import sys
 import os
 import re
 import time
-import json
-from datetime import datetime
+from zipfile import ZipFile
+import urllib.request
+
 if (sys.version_info[0] == 3):
     # For Python 3.0 and later
     from urllib.request import urlopen, Request, HTTPError
@@ -41,30 +42,46 @@ class HansSettings:
             return 'radio'
         return 'tv'
 
-    def get_data_from_github_file(self, github_file):
-        url = 'https://raw.githubusercontent.com/haroo/HansSettings/master/e2_hanssettings_kabelNL/'
-        req = Request(url + github_file)
-        req.add_header(
-            'User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:25.0) Gecko/20100101 Firefox/25.0')
-        req.add_header('Content-Type', 'text/html; charset=utf-8')
+    def get_download_and_unzip_hans_settings(self):
 
-        for attempt in range(10):
-            try:
-                response = urlopen(req)
-            except HTTPError as err:
-                if err.code == 404:
-                    return '' # kan voorkomen als de file niet aanwezig is op de github repo
-            except:
-                continue
-            else:
-                break
-        else:
-            # we failed all the attempts - deal with the consequences.
-            response = urlopen(req)
-        filedata = response.read()
-        if (self.PY3):
-            filedata = filedata.decode('utf-8', 'backslashreplace')
-        response.close()
+        # Zoek naar de eerste link van hans kanalen lijst op de download pagina van de transponder
+        req = urllib.request.urlopen('https://www.detransponder.nl/downloads-2/')
+        text = req.read().decode(req.headers.get_content_charset())
+        m = re.search('(https:\/\/www\.detransponder\.nl\/kanalenlijsten\/kanalenlijst-hans[a-zA-Z0-9-]*)', text)
+        url_download_hans_settings = m.group(0)
+
+        req = urllib.request.urlopen(url_download_hans_settings)
+        text = req.read().decode(req.headers.get_content_charset())
+        m = re.search('(https:[a-zA-Z0-9\/\-\.]*e2_hanssettings_kabelNL\.zip)', text)
+        url_zipfile = m.group(0)
+
+        # Split URL to get the file name
+        filename = url_zipfile.split('/')[-1]
+
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+
+        path = os.path.join(current_dir, filename)
+        if (os.path.isfile(path)):
+            os.remove(path)
+
+        with urllib.request.urlopen( url_zipfile ) as zip_context:
+            content = zip_context.read()
+        with open( path, 'wb' ) as download:
+            download.write( content )
+
+        with ZipFile(filename, 'r') as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall()
+
+    def get_data_from_github_file(self, file):
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        file_to_open = os.path.join(current_dir, 'e2_hanssettings_kabelNL', file)        
+        # if file not exists or is older then 10 days download new zip-file
+        if (not os.path.exists(file_to_open)) or time.time() - os.path.getmtime(file_to_open) > (10 * 24 * 60 * 60):
+            self.get_download_and_unzip_hans_settings()
+
+        with open(file_to_open, 'r', encoding='utf-8', errors='ignore') as stream:
+            filedata = stream.read()
         return filedata
 
     def get_data_from_github_file_bouquets(self, content_type):

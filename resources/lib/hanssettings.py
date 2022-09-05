@@ -69,9 +69,9 @@ class HansSettings:
         with open( path, 'wb' ) as download:
             download.write( content )
 
-        with ZipFile(filename, 'r') as zipObj:
+        with ZipFile(path, 'r') as zipObj:
             # Extract all the contents of zip file in current directory
-            zipObj.extractall()
+            zipObj.extractall(current_dir)
 
     def get_data_from_github_file(self, file):
         current_dir = os.path.dirname(os.path.realpath(__file__))
